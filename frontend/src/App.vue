@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import bookStore from './assets/bookStore.jpg'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue';
 
 const books = ref([]);            // All books fetched from backend
 const searchQuery = ref('');       // Search query input by user
@@ -10,15 +9,15 @@ const categories = ref([]);        // Categories fetched from backend
 const authors = ref([]);           // Authors fetched from backend
 const currentPage = ref(1);        // Current page number
 const totalPages = ref(1);         // Total number of pages
+const isDropdownActive = ref(false); // Track the active state of dropdown
 
-// Fetch books from the backend with optional search query, category, and author filters
+// Fetch books from the backend
 const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
   try {
     const response = await fetch(
       `http://localhost:3000/books?page=${page}&title=${query}&category=${category}&author=${author}`
     );
     const data = await response.json();
-
     if (data && Array.isArray(data.books)) {
       books.value = data.books;
       currentPage.value = data.currentPage;
@@ -29,15 +28,14 @@ const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
   }
 };
 
-// Fetch categories and authors to populate filters
+// Fetch categories and authors for filters
 const fetchFilters = async () => {
   try {
     const response = await fetch('http://localhost:3000/books/filters');
     const data = await response.json();
-
     if (data) {
-      categories.value = data.categories; // Populate categories filter
-      authors.value = data.authors;       // Populate authors filter
+      categories.value = data.categories; 
+      authors.value = data.authors;
     }
   } catch (error) {
     console.error('Error fetching filters:', error);
@@ -46,12 +44,12 @@ const fetchFilters = async () => {
 
 // Handle search functionality
 const handleSearch = () => {
-  fetchBooks(1, searchQuery.value, selectedCategory.value, selectedAuthor.value); // Fetch filtered books
+  fetchBooks(1, searchQuery.value, selectedCategory.value, selectedAuthor.value);
 };
 
-// Handle category and author filter changes
+// Handle filter changes
 const handleFilterChange = () => {
-  fetchBooks(1, searchQuery.value, selectedCategory.value, selectedAuthor.value); // Fetch filtered books
+  fetchBooks(1, searchQuery.value, selectedCategory.value, selectedAuthor.value);
 };
 
 // Pagination logic
@@ -67,93 +65,101 @@ const previousPage = () => {
   }
 };
 
-// Fetch initial data and filters when the component is mounted
+// Toggle the dropdown active state
+const toggleDropdown = () => {
+  isDropdownActive.value = !isDropdownActive.value;
+};
+
+// Fetch initial data
 onMounted(() => {
-  fetchBooks(1);       // Fetch initial books
-  fetchFilters();      // Fetch available categories and authors for filtering
+  fetchBooks(1);
+  fetchFilters();
 });
 </script>
 
 <template>
   <div class="w-screen min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="bg-slate-300 p-3 flex items-center justify-between">
+    <header class="bg-slate-300 p-2 md:p-4 flex flex-col md:flex-row items-center justify-between">
       <div class="flex items-center">
-        <img :src="bookStore" alt="Book Store" class="w-10 h-10 p-0" />
-        <h1 class="ml-3 text-lg font-bold">Book Store</h1>
+        <img src="./assets/bookStore.jpg" alt="Book Store" class="w-12 h-12 md:w-16 md:h-16 p-0" />
+        <h1 class="ml-2 md:ml-4 text-lg md:text-xl font-bold">Book Store</h1>
       </div>
-      <p class="text-gray-600 text-sm">Welcome to the great book store!</p>
+      <p class="hidden md:block text-gray-600 pr-5 text-sm md:text-base">Welcome to the great book store!</p>
     </header>
 
     <!-- Search and Filter Section -->
-    <div class="bg-slate-200 p-3 flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0">
+    <div class="bg-slate-200 p-8 md:flex-row flex justify-around max-w-full">
       <!-- Search Field -->
-      <div class="w-full sm:w-1/3">
-        <label class="block mb-1 text-sm">Search by Title:</label>
+      <div class="w-3/12">
+        <label class="block mb-2">Search by Title:</label>
         <input v-model="searchQuery" @keyup.enter="handleSearch" placeholder="Enter book title" 
-          class="p-2 border rounded w-full text-sm" />
+          class="p-2 border rounded w-full text-sm md:text-base" />
       </div>
 
       <!-- Category Filter -->
-      <div class="w-full sm:w-1/3">
-        <label class="block mb-1 text-sm">Filter by Category:</label>
-        <select v-model="selectedCategory" @change="handleFilterChange" class="p-2 border rounded w-full text-sm">
-          <option value="">All Categories</option>
-          <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
-        </select>
+      <div class="w-3/12	  relative">
+        <label class="block mb-2">Filter by Category:</label>
+        <div @click="toggleDropdown" :class="{ 'dropdown-active': isDropdownActive }"
+             class="p-2 border rounded w-full text-sm md:text-base bg-white">
+          {{ selectedCategory || 'All Categories' }}
+        </div>
+        <ul v-if="isDropdownActive" class="absolute bg-gray-500 w-full max-h-[30vh] overflow-y-auto mt-2">
+          <li v-for="category in categories" :key="category" @click="selectedCategory = category; toggleDropdown()"
+              class="p-2 cursor-pointer hover:bg-orange-700">{{ category }}</li>
+        </ul>
       </div>
 
       <!-- Author Filter -->
-      <div class="w-full sm:w-1/3">
-        <label class="block mb-1 text-sm">Filter by Author:</label>
-        <select v-model="selectedAuthor" @change="handleFilterChange" class="p-2 border rounded w-full text-sm">
-          <option value="">All Authors</option>
-          <option v-for="author in authors" :key="author" :value="author">{{ author }}</option>
-        </select>
+      <div class="w-3/12	 relative">
+        <label class="block mb-2">Filter by Author:</label>
+        <div @click="toggleDropdown" :class="{ 'dropdown-active': isDropdownActive }"
+             class="p-2 border rounded w-full text-sm md:text-base bg-white">
+          {{ selectedAuthor || 'All Authors' }}
+        </div>
+        <ul v-if="isDropdownActive" class="absolute bg-orange-500 w-full max-h-[20vh] overflow-y-auto mt-2">
+          <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleDropdown()"
+              class="p-2 cursor-pointer hover:bg-orange-700">{{ author }}</li>
+        </ul>
       </div>
     </div>
 
-    <!-- Main Content Section (Books) -->
-    <main class="flex-1 bg-slate-100 p-4">
+    <!-- Main Content Section -->
+    <main class="flex-1 bg-slate-100 p-4 md:p-6">
       <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded shadow-sm border">
-          <h3 class="text-lg font-semibold mb-1">{{ book.title }}</h3>
-          <p class="text-sm">Author: {{ book.author }}</p>
-          <p class="text-sm">Price: ${{ book.price }}</p>
-          <p class="text-sm">Category: {{ book.category }}</p>
-          <p class="text-xs text-gray-600 mt-1">{{ book.description }}</p>
+        <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded shadow-lg">
+          <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
+          <p class="text-base sm:text-lg">Author: {{ book.author }}</p>
+          <p class="text-base sm:text-lg">Price: ${{ book.price }}</p>
+          <p class="text-base sm:text-lg">Category: {{ book.category }}</p>
+          <p class="text-sm text-gray-600 mt-2">{{ book.description }}</p>
         </div>
       </div>
 
       <!-- No Books Available -->
       <div v-else class="text-center">
-        <p class="text-sm">No books available.</p>
+        <p class="text-lg sm:text-xl">No books available.</p>
       </div>
     </main>
 
-    <!-- Pagination Section -->
-    <div class="flex justify-center space-x-4 my-4">
-      <button 
-        @click="previousPage" 
-        :disabled="currentPage === 1" 
-        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm" 
-        :class="{ 'opacity-50': currentPage === 1 }">
+    <!-- Pagination -->
+    <div class="flex justify-center space-x-4 my-4 md:my-6">
+      <button @click="previousPage" :disabled="currentPage === 1" 
+        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
         Previous
       </button>
-      <span class="text-sm">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button 
-        @click="nextPage" 
-        :disabled="currentPage === totalPages" 
-        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm" 
-        :class="{ 'opacity-50': currentPage === totalPages }">
+      <span class="text-base sm:text-lg">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages" 
+        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
         Next
       </button>
     </div>
 
     <!-- Footer -->
-    <footer class="bg-slate-400 p-3 text-center text-xs">
-      <div>© 2024 All Rights Reserved</div>
-      <div>Lorem ipsum dolor sit amet</div>
+    <footer class="bg-slate-400 p-4 flex flex-col md:flex-row items-center justify-around text-center md:text-left space-y-2 md:space-y-0">
+      <div class="text-base sm:text-lg font-semibold">© 2024 All Rights Reserved</div>
+      <div class="text-base sm:text-lg font-semibold">Lorem ipsum dolor sit amet</div>
+      <div class="text-base sm:text-lg font-semibold">Lorem ipsum dolor sit amet</div>
     </footer>
   </div>
 </template>

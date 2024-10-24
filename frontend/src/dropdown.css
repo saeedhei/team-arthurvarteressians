@@ -1,0 +1,14 @@
+/* Set a max height of 30% of the viewport height */
+select {
+     max-height: 10vh !important;
+     overflow-y: auto;
+     /* background-color: aqua; */
+   }
+   
+   /* For mobile screens, increase font size to 20px */
+   @media (max-width: 640px) {
+     select {
+       font-size: 80px;
+     }
+   }
+   
