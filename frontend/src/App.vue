@@ -35,34 +35,31 @@ const fetchFilters = async () => {
     const response = await fetch('http://localhost:3000/books/filters');
     const data = await response.json();
     if (data) {
-      categories.value = data.categories;
-      authors.value = data.authors;
+      categories.value = ['All Categories', ...data.categories]; // Add "All" to categories
+      authors.value = ['All Authors', ...data.authors];       // Add "All" to authors
     }
   } catch (error) {
     console.error('Error fetching filters:', error);
   }
 };
 
-// Handle search functionality
-const handleSearch = () => {
-  fetchBooks(1, searchQuery.value, selectedCategory.value, selectedAuthor.value);
-};
-
-// Handle filter changes
-const handleFilterChange = () => {
-  fetchBooks(1, searchQuery.value, selectedCategory.value, selectedAuthor.value);
+// Handle search and filter functionality on button click
+const handleFilter = () => {
+  const category = selectedCategory.value === 'All Categories' ? '' : selectedCategory.value;
+  const author = selectedAuthor.value === 'All Authors' ? '' : selectedAuthor.value;
+  fetchBooks(1, searchQuery.value, category, author);
 };
 
 // Pagination logic
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    fetchBooks(currentPage.value + 1, searchQuery.value, selectedCategory.value, selectedAuthor.value);
+    handleFilter();
   }
 };
 
 const previousPage = () => {
   if (currentPage.value > 1) {
-    fetchBooks(currentPage.value - 1, searchQuery.value, selectedCategory.value, selectedAuthor.value);
+    handleFilter();
   }
 };
 
@@ -109,11 +106,11 @@ onBeforeUnmount(() => {
     </header>
 
     <!-- Search and Filter Section -->
-    <div class="bg-slate-200 p-8 md:flex-row flex justify-around max-w-full">
+    <div class="bg-slate-200 p-8 md:flex-row flex items-center justify-around max-w-full">
       <!-- Search Field -->
       <div class="w-3/12">
         <label class="block mb-2">Search by Title:</label>
-        <input v-model="searchQuery" @keyup.enter="handleSearch" placeholder="Enter book title" 
+        <input v-model="searchQuery" placeholder="Enter book title" 
           class="p-2 border rounded w-full text-sm md:text-base" />
       </div>
 
@@ -141,6 +138,13 @@ onBeforeUnmount(() => {
           <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleAuthorDropdown()"
               class="p-2 cursor-pointer hover:bg-gray-400">{{ author }}</li>
         </ul>
+      </div>
+      
+      <!-- Filter Results Button -->
+      <div class="">
+        <button @click="handleFilter" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          Show Results
+        </button>
       </div>
     </div>
 
