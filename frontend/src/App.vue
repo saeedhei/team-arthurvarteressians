@@ -104,9 +104,9 @@ onMounted(() => {
              class="p-2 border rounded w-full text-sm md:text-base bg-white">
           {{ selectedCategory || 'All Categories' }}
         </div>
-        <ul v-if="isDropdownActive" class="absolute bg-gray-500 w-full max-h-[30vh] overflow-y-auto mt-2">
+        <ul v-if="isDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
           <li v-for="category in categories" :key="category" @click="selectedCategory = category; toggleDropdown()"
-              class="p-2 cursor-pointer hover:bg-orange-700">{{ category }}</li>
+              class="p-2 cursor-pointer hover:bg-gray-400">{{ category }}</li>
         </ul>
       </div>
 
@@ -117,9 +117,9 @@ onMounted(() => {
              class="p-2 border rounded w-full text-sm md:text-base bg-white">
           {{ selectedAuthor || 'All Authors' }}
         </div>
-        <ul v-if="isDropdownActive" class="absolute bg-orange-500 w-full max-h-[20vh] overflow-y-auto mt-2">
+        <ul v-if="isDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
           <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleDropdown()"
-              class="p-2 cursor-pointer hover:bg-orange-700">{{ author }}</li>
+              class="p-2 cursor-pointer hover:bg-gray-400">{{ author }}</li>
         </ul>
       </div>
     </div>
