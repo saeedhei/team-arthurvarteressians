@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 const books = ref([]);            // All books fetched from backend
 const searchQuery = ref('');       // Search query input by user
@@ -9,7 +9,8 @@ const categories = ref([]);        // Categories fetched from backend
 const authors = ref([]);           // Authors fetched from backend
 const currentPage = ref(1);        // Current page number
 const totalPages = ref(1);         // Total number of pages
-const isDropdownActive = ref(false); // Track the active state of dropdown
+const isCategoryDropdownActive = ref(false); // Track the active state of category dropdown
+const isAuthorDropdownActive = ref(false);   // Track the active state of author dropdown
 
 // Fetch books from the backend
 const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
@@ -34,7 +35,7 @@ const fetchFilters = async () => {
     const response = await fetch('http://localhost:3000/books/filters');
     const data = await response.json();
     if (data) {
-      categories.value = data.categories; 
+      categories.value = data.categories;
       authors.value = data.authors;
     }
   } catch (error) {
@@ -65,15 +66,34 @@ const previousPage = () => {
   }
 };
 
-// Toggle the dropdown active state
-const toggleDropdown = () => {
-  isDropdownActive.value = !isDropdownActive.value;
+// Toggle dropdown for category
+const toggleCategoryDropdown = () => {
+  isCategoryDropdownActive.value = !isCategoryDropdownActive.value;
+  isAuthorDropdownActive.value = false; // Close author dropdown when category is opened
 };
 
-// Fetch initial data
+// Toggle dropdown for author
+const toggleAuthorDropdown = () => {
+  isAuthorDropdownActive.value = !isAuthorDropdownActive.value;
+  isCategoryDropdownActive.value = false; // Close category dropdown when author is opened
+};
+
+// Close dropdowns when clicking outside
+const handleClickOutside = (event: MouseEvent) => {
+  if (!(event.target as HTMLElement).closest('.dropdown')) {
+    isCategoryDropdownActive.value = false;
+    isAuthorDropdownActive.value = false;
+  }
+};
+
 onMounted(() => {
   fetchBooks(1);
   fetchFilters();
+  document.addEventListener('click', handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
@@ -98,27 +118,27 @@ onMounted(() => {
       </div>
 
       <!-- Category Filter -->
-      <div class="w-3/12	  relative">
+      <div class="w-3/12 relative">
         <label class="block mb-2">Filter by Category:</label>
-        <div @click="toggleDropdown" :class="{ 'dropdown-active': isDropdownActive }"
-             class="p-2 border rounded w-full text-sm md:text-base bg-white">
+        <div @click="toggleCategoryDropdown" :class="{ 'dropdown-active': isCategoryDropdownActive }"
+             class="p-2 border rounded w-full text-sm md:text-base bg-white dropdown">
           {{ selectedCategory || 'All Categories' }}
         </div>
-        <ul v-if="isDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
-          <li v-for="category in categories" :key="category" @click="selectedCategory = category; toggleDropdown()"
+        <ul v-if="isCategoryDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
+          <li v-for="category in categories" :key="category" @click="selectedCategory = category; toggleCategoryDropdown()"
               class="p-2 cursor-pointer hover:bg-gray-400">{{ category }}</li>
         </ul>
       </div>
 
       <!-- Author Filter -->
-      <div class="w-3/12	 relative">
+      <div class="w-3/12 relative">
         <label class="block mb-2">Filter by Author:</label>
-        <div @click="toggleDropdown" :class="{ 'dropdown-active': isDropdownActive }"
-             class="p-2 border rounded w-full text-sm md:text-base bg-white">
+        <div @click="toggleAuthorDropdown" :class="{ 'dropdown-active': isAuthorDropdownActive }"
+             class="p-2 border rounded w-full text-sm md:text-base bg-white dropdown">
           {{ selectedAuthor || 'All Authors' }}
         </div>
-        <ul v-if="isDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
-          <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleDropdown()"
+        <ul v-if="isAuthorDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
+          <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleAuthorDropdown()"
               class="p-2 cursor-pointer hover:bg-gray-400">{{ author }}</li>
         </ul>
       </div>
