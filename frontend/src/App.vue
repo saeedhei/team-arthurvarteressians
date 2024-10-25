@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useRouter } from 'vue-router'; // Import for routing
 
+const router = useRouter(); // Use Vue router for navigation
 const books = ref([]);            // All books fetched from backend
 const searchQuery = ref('');       // Search query input by user
-const selectedCategory = ref('');  // Selected category for filtering
-const selectedAuthor = ref('');    // Selected author for filtering
+const selectedCategory = ref('All Categories');  // Selected category for filtering
+const selectedAuthor = ref('All Authors');       // Selected author for filtering
 const categories = ref([]);        // Categories fetched from backend
 const authors = ref([]);           // Authors fetched from backend
 const currentPage = ref(1);        // Current page number
 const totalPages = ref(1);         // Total number of pages
 const isCategoryDropdownActive = ref(false); // Track the active state of category dropdown
 const isAuthorDropdownActive = ref(false);   // Track the active state of author dropdown
+const isSearchButtonActive = ref(false);     // Control the "Show Results" button's active state
 
 // Fetch books from the backend
 const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
@@ -35,8 +38,8 @@ const fetchFilters = async () => {
     const response = await fetch('http://localhost:3000/books/filters');
     const data = await response.json();
     if (data) {
-      categories.value = ['All Categories', ...data.categories]; // Add "All" to categories
-      authors.value = ['All Authors', ...data.authors];       // Add "All" to authors
+      categories.value = ['All Categories', ...data.categories];
+      authors.value = ['All Authors', ...data.authors];
     }
   } catch (error) {
     console.error('Error fetching filters:', error);
@@ -44,35 +47,45 @@ const fetchFilters = async () => {
 };
 
 // Handle search and filter functionality on button click
-const handleFilter = () => {
+const handleFilter = (page = 1) => {
   const category = selectedCategory.value === 'All Categories' ? '' : selectedCategory.value;
   const author = selectedAuthor.value === 'All Authors' ? '' : selectedAuthor.value;
-  fetchBooks(1, searchQuery.value, category, author);
+  fetchBooks(page, searchQuery.value, category, author);
+};
+
+// Clear all filters and reset to default values
+const clearFilters = () => {
+  searchQuery.value = '';
+  selectedCategory.value = 'All Categories';
+  selectedAuthor.value = 'All Authors';
+  handleFilter(1);
 };
 
 // Pagination logic
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    handleFilter();
+    currentPage.value += 1;
+    handleFilter(currentPage.value);
   }
 };
 
 const previousPage = () => {
   if (currentPage.value > 1) {
-    handleFilter();
+    currentPage.value -= 1;
+    handleFilter(currentPage.value);
   }
 };
 
 // Toggle dropdown for category
 const toggleCategoryDropdown = () => {
   isCategoryDropdownActive.value = !isCategoryDropdownActive.value;
-  isAuthorDropdownActive.value = false; // Close author dropdown when category is opened
+  isAuthorDropdownActive.value = false;
 };
 
 // Toggle dropdown for author
 const toggleAuthorDropdown = () => {
   isAuthorDropdownActive.value = !isAuthorDropdownActive.value;
-  isCategoryDropdownActive.value = false; // Close category dropdown when author is opened
+  isCategoryDropdownActive.value = false;
 };
 
 // Close dropdowns when clicking outside
@@ -82,6 +95,14 @@ const handleClickOutside = (event: MouseEvent) => {
     isAuthorDropdownActive.value = false;
   }
 };
+
+// Watch for changes to enable/disable the "Show Results" button
+watch([searchQuery, selectedCategory, selectedAuthor], () => {
+  const isSearchFilled = searchQuery.value.trim() !== '';
+  const isCategorySelected = selectedCategory.value !== 'All Categories';
+  const isAuthorSelected = selectedAuthor.value !== 'All Authors';
+  isSearchButtonActive.value = isSearchFilled || isCategorySelected || isAuthorSelected;
+});
 
 onMounted(() => {
   fetchBooks(1);
@@ -99,7 +120,9 @@ onBeforeUnmount(() => {
     <!-- Header -->
     <header class="bg-slate-300 p-2 md:p-4 flex flex-col md:flex-row items-center justify-between">
       <div class="flex items-center">
-        <img src="./assets/bookStore.jpg" alt="Book Store" class="w-12 h-12 md:w-16 md:h-16 p-0" />
+        <!-- Make the store image clickable -->
+        <img src="./assets/bookStore.jpg" alt="Book Store" @click="router.push('/')"
+             class="w-12 h-12 md:w-16 md:h-16 cursor-pointer p-0" />
         <h1 class="ml-2 md:ml-4 text-lg md:text-xl font-bold">Book Store</h1>
       </div>
       <p class="hidden md:block text-gray-600 pr-5 text-sm md:text-base">Welcome to the great book store!</p>
@@ -141,15 +164,23 @@ onBeforeUnmount(() => {
       </div>
       
       <!-- Filter Results Button -->
-      <div class="">
-        <button @click="handleFilter" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      <div>
+        <button @click="handleFilter" :disabled="!isSearchButtonActive" 
+                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
           Show Results
+        </button>
+      </div>
+
+      <!-- Clear Filters Button -->
+      <div>
+        <button @click="clearFilters" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+          Clear Filters
         </button>
       </div>
     </div>
 
     <!-- Main Content Section -->
-    <main class="flex-1 bg-slate-100 p-4 md:p-6">
+    <main class="flex-1 bg-slate-100 p-4 md:p-6" style="min-height: 60vh;">
       <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded shadow-lg">
           <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
