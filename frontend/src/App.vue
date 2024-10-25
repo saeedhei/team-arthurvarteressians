@@ -1,21 +1,41 @@
+
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRouter } from 'vue-router'; // Import for routing (make easy reloading)
+import Toastify from 'toastify-js'; // Import Toastify
+import "toastify-js/src/toastify.css"; // Import Toastify CSS
 
+// Initialize Vue Router
 const router = useRouter();
-const books = ref([]);            // All books fetched from backend
-const searchQuery = ref('');       // Search query input by user
-const selectedCategory = ref('All Categories');  // Selected category for filtering
-const selectedAuthor = ref('All Authors');       // Selected author for filtering
-const categories = ref([]);        // Categories fetched from backend
-const authors = ref([]);           // Authors fetched from backend
-const currentPage = ref(1);        // Current page number
-const totalPages = ref(1);         // Total number of pages
-const isCategoryDropdownActive = ref(false); // Track the active state of category dropdown
-const isAuthorDropdownActive = ref(false);   // Track the active state of author dropdown
-const isSearchButtonActive = ref(false);     // Control the "Show Results" button's active state
 
-// Fetch books from the backend
+// Reactive State Variables
+const books = ref([]);
+const searchQuery = ref('');
+const selectedCategory = ref('All Categories');
+const selectedAuthor = ref('All Authors');
+const categories = ref([]);
+const authors = ref([]);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const isCategoryDropdownActive = ref(false);
+const isAuthorDropdownActive = ref(false);
+const isSearchButtonActive = ref(false);
+const welcomeShown = ref(false); // Flag to track if welcome message was shown
+
+// Function to show Toast Notification
+const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+  Toastify({
+    text: message,
+    duration: 3000,
+    gravity: "top",
+    position: "right",
+    backgroundColor: type === 'success' ? "green" : "red",
+    stopOnFocus: true,
+    close: true,
+  }).showToast();
+};
+
+// Fetch books from the backend with filters and pagination
 const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
   try {
     const response = await fetch(
@@ -29,10 +49,12 @@ const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
     }
   } catch (error) {
     console.error('Error fetching books:', error);
+    showToast("Failed to load books. Please try again later.", "error");
+    throw error; // Re-throw to stop welcome toast from showing
   }
 };
 
-// Fetch categories and authors for filters
+// Fetch categories and authors for dropdown filters
 const fetchFilters = async () => {
   try {
     const response = await fetch('http://localhost:3000/books/filters');
@@ -43,6 +65,8 @@ const fetchFilters = async () => {
     }
   } catch (error) {
     console.error('Error fetching filters:', error);
+    showToast("Failed to load filters. Please try again later.", "error");
+    throw error; // Re-throw to stop welcome toast from showing
   }
 };
 
@@ -59,6 +83,7 @@ const clearFilters = () => {
   selectedCategory.value = 'All Categories';
   selectedAuthor.value = 'All Authors';
   handleFilter(1);
+  showToast("Filters cleared successfully!", "success");
 };
 
 // Pagination logic
@@ -104,20 +129,32 @@ watch([searchQuery, selectedCategory, selectedAuthor], () => {
   isSearchButtonActive.value = isSearchFilled || isCategorySelected || isAuthorSelected;
 });
 
-onMounted(() => {
-  fetchBooks(1);
-  fetchFilters();
-  document.addEventListener('click', handleClickOutside);
+// Lifecycle hook: Runs when the component mounts
+onMounted(async () => {
+  try {
+    // Fetch books and filters, only show the welcome message if both succeed
+    await fetchBooks(1);
+    await fetchFilters();
+    if (!welcomeShown.value) {
+      showToast("Welcome to the Book Store!", "success");
+      welcomeShown.value = true; // Ensure it's only shown once
+    }
+  } catch (error) {
+    // If either fetching books or filters fails, no welcome message is shown
+    console.error('Error during setup:', error);
+  }
 });
 
+// Lifecycle hook: Runs before the component unmounts
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
+
 <template>
   <div class="w-screen min-h-screen flex flex-col">
-    <!-- Header -->
+    <!-- Header Section -->
     <header class="bg-slate-300 p-2 md:p-4 flex flex-col md:flex-row items-center justify-between">
       <div class="flex items-center">
         <!-- Make the store image clickable and force reload -->
@@ -162,13 +199,13 @@ onBeforeUnmount(() => {
               class="p-2 cursor-pointer hover:bg-gray-400">{{ author }}</li>
         </ul>
       </div>
-      
+
       <!-- Filter Results Button -->
       <div>
-          <button @click="() => handleFilter()" :disabled="!isSearchButtonActive" 
+        <button @click="handleFilter" :disabled="!isSearchButtonActive" 
            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
-            Show Results
-          </button>
+          Show Results
+        </button>
       </div>
 
       <!-- Clear Filters Button -->
@@ -191,13 +228,13 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- If Any Error Happens -->
+      <!-- Message for No Books Available -->
       <div v-else class="text-center">
         <p class="text-lg sm:text-xl">No books available.</p>
       </div>
     </main>
 
-    <!-- Page Buttons -->
+    <!-- Pagination Buttons -->
     <div class="flex justify-center space-x-4 my-4 md:my-6">
       <button @click="previousPage" :disabled="currentPage === 1" 
         class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
