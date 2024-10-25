@@ -3,26 +3,41 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRouter } from 'vue-router'; // For navigation and page reload
 import { useToast } from 'vue-toastification'; // Import Vue Toastification
 
+// Define types for the book and filters data
+interface Book {
+  _id: string;
+  title: string;
+  author: string;
+  price: number;
+  description: string;
+  category: string;
+}
+
+interface FilterResponse {
+  categories: string[];
+  authors: string[];
+}
+
 // Initialize Vue Router and Toast
 const router = useRouter();
 const toast = useToast(); // Create toast instance
 
-// Reactive State Variables
-const books = ref([]);
-const searchQuery = ref('');
-const selectedCategory = ref('All Categories');
-const selectedAuthor = ref('All Authors');
-const categories = ref([]);
-const authors = ref([]);
-const currentPage = ref(1);
-const totalPages = ref(1);
-const isCategoryDropdownActive = ref(false);
-const isAuthorDropdownActive = ref(false);
-const isSearchButtonActive = ref(false);
-const welcomeShown = ref(false); // Track whether the welcome message was shown
+// Reactive State Variables with proper types
+const books = ref<Book[]>([]); // Array of Book objects
+const searchQuery = ref<string>(''); // String for search query
+const selectedCategory = ref<string>('All Categories'); // Selected category for filtering
+const selectedAuthor = ref<string>('All Authors'); // Selected author for filtering
+const categories = ref<string[]>([]); // Categories fetched from backend
+const authors = ref<string[]>([]); // Authors fetched from backend
+const currentPage = ref<number>(1); // Current page number
+const totalPages = ref<number>(1); // Total number of pages
+const isCategoryDropdownActive = ref<boolean>(false); // Track the active state of category dropdown
+const isAuthorDropdownActive = ref<boolean>(false); // Track the active state of author dropdown
+const isSearchButtonActive = ref<boolean>(false); // Control the "Show Results" button's active state
+const welcomeShown = ref<boolean>(false); // Track whether the welcome message was shown
 
 // Function to show Toast Notification
-const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+const showToast = (message: string, type: 'success' | 'error' = 'success'): void => {
   if (type === 'success') {
     toast.success(message);
   } else {
@@ -31,7 +46,7 @@ const showToast = (message: string, type: 'success' | 'error' = 'success') => {
 };
 
 // Fetch books from the backend with filters and pagination
-const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
+const fetchBooks = async (page = 1, query = '', category = '', author = ''): Promise<void> => {
   try {
     const response = await fetch(
       `http://localhost:3000/books?page=${page}&title=${query}&category=${category}&author=${author}`
@@ -50,10 +65,10 @@ const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
 };
 
 // Fetch categories and authors for dropdown filters
-const fetchFilters = async () => {
+const fetchFilters = async (): Promise<void> => {
   try {
     const response = await fetch('http://localhost:3000/books/filters');
-    const data = await response.json();
+    const data: FilterResponse = await response.json();
     if (data) {
       categories.value = ['All Categories', ...data.categories];
       authors.value = ['All Authors', ...data.authors];
@@ -66,30 +81,30 @@ const fetchFilters = async () => {
 };
 
 // Handle search and filter functionality on button click
-const handleFilter = (page = 1) => {
+const handleFilter = (page = 1): void => {
   const category = selectedCategory.value === 'All Categories' ? '' : selectedCategory.value;
   const author = selectedAuthor.value === 'All Authors' ? '' : selectedAuthor.value;
   fetchBooks(page, searchQuery.value, category, author);
 };
 
 // Clear all filters and reset to default values
-const clearFilters = () => {
+const clearFilters = (): void => {
   searchQuery.value = '';
   selectedCategory.value = 'All Categories';
   selectedAuthor.value = 'All Authors';
   handleFilter(1);
-  showToast("Filters cleared successfully!", "success");
+  showToast("Search again", "success");
 };
 
 // Pagination logic
-const nextPage = () => {
+const nextPage = (): void => {
   if (currentPage.value < totalPages.value) {
     currentPage.value += 1;
     handleFilter(currentPage.value);
   }
 };
 
-const previousPage = () => {
+const previousPage = (): void => {
   if (currentPage.value > 1) {
     currentPage.value -= 1;
     handleFilter(currentPage.value);
@@ -97,19 +112,19 @@ const previousPage = () => {
 };
 
 // Toggle dropdown for category
-const toggleCategoryDropdown = () => {
+const toggleCategoryDropdown = (): void => {
   isCategoryDropdownActive.value = !isCategoryDropdownActive.value;
   isAuthorDropdownActive.value = false;
 };
 
 // Toggle dropdown for author
-const toggleAuthorDropdown = () => {
+const toggleAuthorDropdown = (): void => {
   isAuthorDropdownActive.value = !isAuthorDropdownActive.value;
   isCategoryDropdownActive.value = false;
 };
 
 // Close dropdowns when clicking outside
-const handleClickOutside = (event: MouseEvent) => {
+const handleClickOutside = (event: MouseEvent): void => {
   if (!(event.target as HTMLElement).closest('.dropdown')) {
     isCategoryDropdownActive.value = false;
     isAuthorDropdownActive.value = false;
@@ -117,7 +132,7 @@ const handleClickOutside = (event: MouseEvent) => {
 };
 
 // Watch for changes to enable/disable the "Show Results" button
-watch([searchQuery, selectedCategory, selectedAuthor], () => {
+watch([searchQuery, selectedCategory, selectedAuthor], (): void => {
   const isSearchFilled = searchQuery.value.trim() !== '';
   const isCategorySelected = selectedCategory.value !== 'All Categories';
   const isAuthorSelected = selectedAuthor.value !== 'All Authors';
@@ -125,7 +140,7 @@ watch([searchQuery, selectedCategory, selectedAuthor], () => {
 });
 
 // Lifecycle hook: Runs when the component mounts
-onMounted(async () => {
+onMounted(async (): Promise<void> => {
   try {
     // Fetch books and filters, show welcome message only if both succeed
     await fetchBooks(1);
@@ -141,7 +156,7 @@ onMounted(async () => {
 });
 
 // Lifecycle hook: Runs before the component unmounts
-onBeforeUnmount(() => {
+onBeforeUnmount((): void => {
   document.removeEventListener('click', handleClickOutside);
 });
 </script>
@@ -155,7 +170,7 @@ onBeforeUnmount(() => {
              class="w-12 h-12 md:w-16 md:h-16 cursor-pointer p-0" />
         <h1 class="ml-2 md:ml-4 text-lg md:text-xl font-bold">Book Store</h1>
       </div>
-      <p class="hidden md:block text-gray-600 pr-5 text-sm md:text-base">Welcome to the great book store!</p>
+      <p class="hidden md:block text-gray-600 pr-5 text-sm md:text-base">Buch & Wein</p>
     </header>
 
     <!-- Search and Filter Section -->
@@ -195,10 +210,13 @@ onBeforeUnmount(() => {
 
       <!-- Filter Results Button -->
       <div>
-        <button @click="handleFilter" :disabled="!isSearchButtonActive" 
-           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
-          Show Results
-        </button>
+<!-- Corrected code with arrow function -->
+<button @click="() => handleFilter()" :disabled="!isSearchButtonActive" 
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
+  Show Results
+</button>
+
+
       </div>
 
       <!-- Clear Filters Button -->
