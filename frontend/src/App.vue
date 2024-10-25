@@ -1,12 +1,11 @@
-
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useRouter } from 'vue-router'; // Import for routing (make easy reloading)
-import Toastify from 'toastify-js'; // Import Toastify
-import "toastify-js/src/toastify.css"; // Import Toastify CSS
+import { useRouter } from 'vue-router'; // For navigation and page reload
+import { useToast } from 'vue-toastification'; // Import Vue Toastification
 
-// Initialize Vue Router
+// Initialize Vue Router and Toast
 const router = useRouter();
+const toast = useToast(); // Create toast instance
 
 // Reactive State Variables
 const books = ref([]);
@@ -20,19 +19,15 @@ const totalPages = ref(1);
 const isCategoryDropdownActive = ref(false);
 const isAuthorDropdownActive = ref(false);
 const isSearchButtonActive = ref(false);
-const welcomeShown = ref(false); // Flag to track if welcome message was shown
+const welcomeShown = ref(false); // Track whether the welcome message was shown
 
 // Function to show Toast Notification
 const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-  Toastify({
-    text: message,
-    duration: 3000,
-    gravity: "top",
-    position: "right",
-    backgroundColor: type === 'success' ? "green" : "red",
-    stopOnFocus: true,
-    close: true,
-  }).showToast();
+  if (type === 'success') {
+    toast.success(message);
+  } else {
+    toast.error(message);
+  }
 };
 
 // Fetch books from the backend with filters and pagination
@@ -50,7 +45,7 @@ const fetchBooks = async (page = 1, query = '', category = '', author = '') => {
   } catch (error) {
     console.error('Error fetching books:', error);
     showToast("Failed to load books. Please try again later.", "error");
-    throw error; // Re-throw to stop welcome toast from showing
+    throw error;
   }
 };
 
@@ -66,7 +61,7 @@ const fetchFilters = async () => {
   } catch (error) {
     console.error('Error fetching filters:', error);
     showToast("Failed to load filters. Please try again later.", "error");
-    throw error; // Re-throw to stop welcome toast from showing
+    throw error;
   }
 };
 
@@ -132,15 +127,15 @@ watch([searchQuery, selectedCategory, selectedAuthor], () => {
 // Lifecycle hook: Runs when the component mounts
 onMounted(async () => {
   try {
-    // Fetch books and filters, only show the welcome message if both succeed
+    // Fetch books and filters, show welcome message only if both succeed
     await fetchBooks(1);
     await fetchFilters();
     if (!welcomeShown.value) {
       showToast("Welcome to the Book Store!", "success");
-      welcomeShown.value = true; // Ensure it's only shown once
+      welcomeShown.value = true;
     }
   } catch (error) {
-    // If either fetching books or filters fails, no welcome message is shown
+    // Handle error, no welcome toast if there's a failure
     console.error('Error during setup:', error);
   }
 });
@@ -151,13 +146,11 @@ onBeforeUnmount(() => {
 });
 </script>
 
-
 <template>
   <div class="w-screen min-h-screen flex flex-col">
-    <!-- Header Section -->
+    <!-- Header -->
     <header class="bg-slate-300 p-2 md:p-4 flex flex-col md:flex-row items-center justify-between">
       <div class="flex items-center">
-        <!-- Make the store image clickable and force reload -->
         <img src="./assets/bookStore.jpg" alt="Book Store" @click="router.go(0)" 
              class="w-12 h-12 md:w-16 md:h-16 cursor-pointer p-0" />
         <h1 class="ml-2 md:ml-4 text-lg md:text-xl font-bold">Book Store</h1>
