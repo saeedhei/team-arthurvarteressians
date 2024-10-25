@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-// Connect to MongoDB Atlas
+// Connect to MongoDB Atlas.
 mongoose
   .connect(
     "mongodb+srv://root:hap9S2%40NLSA2hX%40@bookstore.7e2l3.mongodb.net/bookstore",
@@ -17,7 +17,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
-// Define the book schema that should be retrieved from the database
+// Define the book schema, get info from DB.
 const bookSchema = new mongoose.Schema({
   title: String,
   author: String,
@@ -26,18 +26,20 @@ const bookSchema = new mongoose.Schema({
   category: String,
 });
 
-// Create the Book model based on the schema
+// Create the book model based on the schema
 const Book = mongoose.model("Book", bookSchema);
 
 
-app.get("/books", async (req, res) => {
+app.get("/books", async (req, res) => { // Our endpoint
   try {
-    const { page = 1, title } = req.query;
-    const limit = 9;
-    const skip = (page - 1) * limit;
+    const { page = 1, title, category, author } = req.query; // Get info based on requirements.
+    const limit = 6; // Content limit for each request.
+    const skip = (page - 1) * limit; // Because our data is low, I used the skip method. But for larger data, we can use _id method.
 
-    const query = {};
-    if (title) query.title = { $regex: title, $options: "i" }; // Search books by title (case-insensitive)
+    const query = {}; // Initializes an empty query obj for hold conditions.
+    if (title) query.title = { $regex: title, $options: "i" }; // Search books by title (case-insensitive for match any case variation)
+    if (category) query.category = category;
+    if (author) query.author = author;
 
     const books = await Book.find(query).skip(skip).limit(limit);
     const totalBooks = await Book.countDocuments(query);
@@ -63,7 +65,6 @@ app.get("/books/filters", async (req, res) => {
     res.status(500).json({ message: 'Error fetching filters', error });
   }
 });
-
 
 
 // Start the server

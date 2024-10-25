@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useRouter } from 'vue-router'; // Import for routing
+import { useRouter } from 'vue-router'; // Import for routing (make easy reloading)
 
-const router = useRouter(); // Use Vue router for navigation
+const router = useRouter();
 const books = ref([]);            // All books fetched from backend
 const searchQuery = ref('');       // Search query input by user
 const selectedCategory = ref('All Categories');  // Selected category for filtering
@@ -120,8 +120,8 @@ onBeforeUnmount(() => {
     <!-- Header -->
     <header class="bg-slate-300 p-2 md:p-4 flex flex-col md:flex-row items-center justify-between">
       <div class="flex items-center">
-        <!-- Make the store image clickable -->
-        <img src="./assets/bookStore.jpg" alt="Book Store" @click="router.push('/')"
+        <!-- Make the store image clickable and force reload -->
+        <img src="./assets/bookStore.jpg" alt="Book Store" @click="router.go(0)" 
              class="w-12 h-12 md:w-16 md:h-16 cursor-pointer p-0" />
         <h1 class="ml-2 md:ml-4 text-lg md:text-xl font-bold">Book Store</h1>
       </div>
@@ -165,10 +165,10 @@ onBeforeUnmount(() => {
       
       <!-- Filter Results Button -->
       <div>
-        <button @click="handleFilter" :disabled="!isSearchButtonActive" 
-                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
-          Show Results
-        </button>
+          <button @click="() => handleFilter()" :disabled="!isSearchButtonActive" 
+           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
+            Show Results
+          </button>
       </div>
 
       <!-- Clear Filters Button -->
@@ -191,13 +191,13 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- No Books Available -->
+      <!-- If Any Error Happens -->
       <div v-else class="text-center">
         <p class="text-lg sm:text-xl">No books available.</p>
       </div>
     </main>
 
-    <!-- Pagination -->
+    <!-- Page Buttons -->
     <div class="flex justify-center space-x-4 my-4 md:my-6">
       <button @click="previousPage" :disabled="currentPage === 1" 
         class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
@@ -210,7 +210,7 @@ onBeforeUnmount(() => {
       </button>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer Section -->
     <footer class="bg-slate-400 p-4 flex flex-col md:flex-row items-center justify-around text-center md:text-left space-y-2 md:space-y-0">
       <div class="text-base sm:text-lg font-semibold">© 2024 All Rights Reserved</div>
       <div class="text-base sm:text-lg font-semibold">Lorem ipsum dolor sit amet</div>
