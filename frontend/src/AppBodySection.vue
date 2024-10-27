@@ -160,9 +160,9 @@ onBeforeUnmount((): void => {
 </script>
 
 <template>
-  <div class="w-screen min-h-screen flex flex-col">
+  <div class="w-screen flex flex-col min-h-full">
     <!-- Search and Filter Section -->
-    <div class="bg-slate-200 p-8 md:flex-row flex items-center justify-around max-w-full">
+    <div class="bg-slate-100 p-8 md:flex-row flex items-center justify-around max-w-full">
       <!-- Search Field -->
       <div class="w-3/12">
         <label class="block mb-2">Search by Title:</label>
@@ -215,7 +215,7 @@ onBeforeUnmount((): void => {
     </div>
 
     <!-- Main Content Section -->
-    <main class="flex-1 bg-slate-100 p-4 md:p-6">
+    <main class="flex-1 bg-slate-300 h-90 p-4 md:p-6">
       <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded shadow-lg">
           <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
@@ -233,16 +233,18 @@ onBeforeUnmount((): void => {
     </main>
 
     <!-- Pagination Buttons -->
-    <div class="flex justify-center space-x-4 my-4 md:my-6">
-      <button @click="previousPage" :disabled="currentPage === 1" 
-        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
-        Previous
-      </button>
-      <span class="text-base sm:text-lg">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages" 
-        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
-        Next
-      </button>
+     <div class="bg-gray-100" >
+      <div class="flex justify-center space-x-4 my-4 md:my-6">
+            <button @click="previousPage" :disabled="currentPage === 1" 
+               class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
+             Previous
+             </button>
+           <span class="text-base sm:text-lg">Page {{ currentPage }} of {{ totalPages }}</span>
+          <button @click="nextPage" :disabled="currentPage === totalPages" 
+               class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
+             Next
+           </button>
+     </div>
     </div>
   </div>
 </template>

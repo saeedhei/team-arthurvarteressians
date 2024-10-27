@@ -14,6 +14,6 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const redirectToHome = () => {
-  router.replace('/'); // Navigate to the home route without reloading
+  router.replace('/');
 };
 </script>
