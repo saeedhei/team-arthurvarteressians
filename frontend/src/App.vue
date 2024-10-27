@@ -96,6 +96,18 @@ const clearFilters = (): void => {
   showToast("Search again", "success");
 };
 
+
+
+
+
+
+const redirectToManagerPage = () => {
+  router.push('/manager'); // Programmatic navigation to /manager
+};
+
+
+
+
 // Pagination logic
 const nextPage = (): void => {
   if (currentPage.value < totalPages.value) {
@@ -228,7 +240,7 @@ onBeforeUnmount((): void => {
     </div>
 
     <!-- Main Content Section -->
-    <main class="flex-1 bg-slate-100 p-4 md:p-6" style="min-height: 60vh;">
+    <main class="flex-1 bg-slate-100 p-4 md:p-6">
       <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded shadow-lg">
           <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
@@ -257,16 +269,18 @@ onBeforeUnmount((): void => {
         Next
       </button>
     </div>
-
+    <router-view />
     <!-- Footer Section -->
     <footer class="bg-slate-400 p-4 flex flex-col md:flex-row items-center justify-around text-center md:text-left space-y-2 md:space-y-0">
       <div class="text-base sm:text-lg font-semibold">© 2024 All Rights Reserved</div>
       <div class="text-base sm:text-lg font-semibold">Lorem ipsum dolor sit amet</div>
 
-      <router-link to="/manager">
-    <button class="text-base sm:text-lg font-light">Manager login</button>
-  </router-link>
+      <button @click="redirectToManagerPage" class="text-base sm:text-lg font-light">
+      Manager login
+    </button>
+      
 
-    </footer>
+
+      </footer>
   </div>
 </template>

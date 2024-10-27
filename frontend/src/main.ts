@@ -4,10 +4,11 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import Toast from 'vue-toastification'; // Import Vue Toastification
 import 'vue-toastification/dist/index.css'; // Import Vue Toastification CSS
-import App from './App.vue';
+// import App from './App.vue';
 import router from './router';
+import AppMainPage from './AppMainPage.vue'; // Change this line to AppMainPage
 
-const app = createApp(App);
+const app = createApp(AppMainPage);
 
 app.use(createPinia());
 app.use(router);

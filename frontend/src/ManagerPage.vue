@@ -1,3 +1,17 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
+const actionCount = ref(0);
+
+const handleAction = () => {
+  actionCount.value++;
+  toast.success(`Action performed successfully! Count: ${actionCount.value}`);
+};
+</script>
+
+
 <template>
      <section class="p-8 bg-gray-100 min-h-screen flex flex-col items-center">
        <!-- Header Section -->
@@ -24,20 +38,4 @@
      </section>
    </template>
    
-   <script setup lang="ts">
-   import { ref } from 'vue';
-   import { useToast } from 'vue-toastification';
-   
-   const toast = useToast();
-   const actionCount = ref(0);
-   
-   const handleAction = () => {
-     actionCount.value++;
-     toast.success(`Action performed successfully! Count: ${actionCount.value}`);
-   };
-   </script>
-   
-   <style scoped>
-   /* Tailwind CSS handles the styling, so no additional styles are needed here */
-   </style>
-   
+
