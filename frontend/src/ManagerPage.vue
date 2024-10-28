@@ -4,8 +4,8 @@ import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 import AppHeader from './AppHeader.vue';
 import AppFooter from './AppFooter.vue';
-import LoadingOverlay from './LoadingOverlay.vue'; // Overlay for loading/success display
-import SuccessIcon from './SuccessIcon.vue'; // Success icon for feedback
+import LoadingOverlay from './LoadingOverlay.vue'; // Import the overlay component
+import SuccessIcon from './SuccessIcon.vue'; // Import success icon
 
 const toast = useToast();
 
@@ -26,7 +26,7 @@ const totalPages = ref(1);
 const limit = 9;
 
 // Sorting states
-const isDescending = ref(true); // Default sorting order
+const isDescending = ref(true); // Set default sort to descending
 
 // State for popups and book actions
 const editingBook = ref<Book | null>(null);
@@ -39,7 +39,7 @@ const selectedBookToDelete = ref<Book | null>(null);
 // State for adding a new book
 const newBook = ref<Book>({ _id: '', title: '', author: '', price: 0, description: '', category: '' });
 
-// Fetch books with sorting across all pages
+// Fetch books with sorting based on isDescending
 const fetchBooks = async () => {
   try {
     const sort = isDescending.value ? 'desc' : 'asc';
@@ -55,7 +55,6 @@ const fetchBooks = async () => {
 // Toggle sorting direction and fetch sorted books
 const toggleSorting = () => {
   isDescending.value = !isDescending.value;
-  currentPage.value = 1; // Reset to first page on sort change
   fetchBooks();
 };
 
@@ -153,7 +152,6 @@ const previousPage = () => {
   }
 };
 
-// Initial fetch of books
 onMounted(() => {
   fetchBooks();
 });
@@ -252,9 +250,8 @@ onMounted(() => {
       </div>
 
       <!-- Loading Overlay with Success Icon -->
-      <LoadingOverlay v-if="showLoadingOverlay">
+      <LoadingOverlay v-if="showLoadingOverlay" :show="showLoadingOverlay" message="Book added successfully!">
         <SuccessIcon />
-        <p class="text-white text-xl mt-4">Book added successfully!</p>
       </LoadingOverlay>
 
       <!-- Edit Book Popup -->

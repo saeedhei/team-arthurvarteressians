@@ -21,7 +21,7 @@
      if (newVal) {
        setTimeout(() => {
          emit('hideOverlay'); // Emit hideOverlay event after timeout
-       }, 2000); // Adjust time as needed
+       }, 5000); // Adjust time as needed
      }
    });
    </script>
@@ -32,8 +32,8 @@
      top: 0;
      left: 0;
      width: 100%;
-     height: 80vh;
-     background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+     height: 100vh;
+     background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
      color: white;
      display: flex;
      align-items: center;
