@@ -4,6 +4,8 @@ import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 import AppHeader from './AppHeader.vue';
 import AppFooter from './AppFooter.vue';
+import LoadingOverlay from './LoadingOverlay.vue'; // Overlay for loading/success display
+import SuccessIcon from './SuccessIcon.vue'; // Success icon for feedback
 
 const toast = useToast();
 
@@ -23,25 +25,38 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const limit = 9;
 
+// Sorting states
+const isDescending = ref(true); // Default sorting order
+
 // State for popups and book actions
 const editingBook = ref<Book | null>(null);
 const showEditPopup = ref(false);
 const showAddPopup = ref(false);
 const showDeleteConfirmation = ref(false);
+const showLoadingOverlay = ref(false); // State for showing loading overlay
 const selectedBookToDelete = ref<Book | null>(null);
 
 // State for adding a new book
 const newBook = ref<Book>({ _id: '', title: '', author: '', price: 0, description: '', category: '' });
 
+// Fetch books with sorting across all pages
 const fetchBooks = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/books?page=${currentPage.value}&limit=${limit}`);
+    const sort = isDescending.value ? 'desc' : 'asc';
+    const response = await fetch(`http://localhost:3000/books?page=${currentPage.value}&limit=${limit}&sort=${sort}`);
     const data = await response.json();
     books.value = data.books;
     totalPages.value = data.totalPages;
   } catch (error) {
     toast.error('Failed to fetch books.');
   }
+};
+
+// Toggle sorting direction and fetch sorted books
+const toggleSorting = () => {
+  isDescending.value = !isDescending.value;
+  currentPage.value = 1; // Reset to first page on sort change
+  fetchBooks();
 };
 
 // Function to handle adding a new book
@@ -54,9 +69,11 @@ const addBook = async () => {
     });
     if (response.ok) {
       toast.success('Book added successfully');
-      fetchBooks();
+      showLoadingOverlay.value = true; // Show overlay on success
+      fetchBooks(); // Refresh the book list to include the new addition
       showAddPopup.value = false;
       newBook.value = { _id: '', title: '', author: '', price: 0, description: '', category: '' };
+      setTimeout(() => showLoadingOverlay.value = false, 2000); // Hide overlay after 2 seconds
     } else {
       throw new Error();
     }
@@ -136,6 +153,7 @@ const previousPage = () => {
   }
 };
 
+// Initial fetch of books
 onMounted(() => {
   fetchBooks();
 });
@@ -146,10 +164,13 @@ onMounted(() => {
     <AppHeader />
     <section class="p-8 min-h-[80vh] bg-gray-100 flex flex-col justify-between items-center">
       
-      <!-- Add Book Button -->
-      <div class="flex justify-end w-full mb-4">
+      <!-- Add Book and Sort Buttons -->
+      <div class="flex justify-between w-full mb-4">
         <button @click="showAddPopup = true" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
           Add Book
+        </button>
+        <button @click="toggleSorting" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+          Sort by Date {{ isDescending ? 'Descending' : 'Ascending' }}
         </button>
       </div>
       
@@ -173,16 +194,14 @@ onMounted(() => {
           <!-- Edit and Delete Buttons with SVG Icons -->
           <div class="flex justify-end space-x-4 mt-4">
             <button @click="editBook(book)" class="text-blue-500 flex items-center space-x-1">
-              <!-- Edit SVG Icon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M15.232 4.232a2.5 2.5 0 113.536 3.536l-1.768 1.768-3.536-3.536 1.768-1.768zM4 15.5v4h4l10.707-10.707a1 1 0 000-1.414l-3.586-3.586a1 1 0 00-1.414 0L4 15.5z"/>
               </svg>
               <span>Edit</span>
             </button>
             <button @click="confirmDeleteBook(book)" class="text-red-500 flex items-center space-x-1">
-              <!-- Delete SVG Icon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 7h-1l-1-1h-6l-1 1h-1v2h10v-2zM9 9h6l1 12h-8l1-12z"/>
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <span>Delete</span>
             </button>
@@ -232,6 +251,12 @@ onMounted(() => {
         </div>
       </div>
 
+      <!-- Loading Overlay with Success Icon -->
+      <LoadingOverlay v-if="showLoadingOverlay">
+        <SuccessIcon />
+        <p class="text-white text-xl mt-4">Book added successfully!</p>
+      </LoadingOverlay>
+
       <!-- Edit Book Popup -->
       <div v-if="showEditPopup" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
         <div class="bg-white p-6 rounded-md shadow-md max-w-md w-full">
@@ -278,3 +303,9 @@ onMounted(() => {
     <AppFooter />
   </div>
 </template>
+
+<style scoped>
+button {
+  cursor: pointer;
+}
+</style>
