@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useToast } from 'vue-toastification'; // Import Vue Toastification
+import { useToast } from 'vue-toastification';
 
 // Define types for the book and filters data
 interface Book {
@@ -18,23 +18,22 @@ interface FilterResponse {
 }
 
 // Initialize Vue Router and Toast
-const toast = useToast(); // Create toast instance
+const toast = useToast();
 
 // Reactive State Variables with proper types
-const books = ref<Book[]>([]); // Array of Book objects
-const searchQuery = ref<string>(''); // String for search query
-const selectedCategory = ref<string>('All Categories'); // Selected category for filtering
-const selectedAuthor = ref<string>('All Authors'); // Selected author for filtering
-const categories = ref<string[]>([]); // Categories fetched from backend
-const authors = ref<string[]>([]); // Authors fetched from backend
-const currentPage = ref<number>(1); // Current page number
-const totalPages = ref<number>(1); // Total number of pages
-const isCategoryDropdownActive = ref<boolean>(false); // Track the active state of category dropdown
-const isAuthorDropdownActive = ref<boolean>(false); // Track the active state of author dropdown
-const isSearchButtonActive = ref<boolean>(false); // Control the "Show Results" button's active state
-const welcomeShown = ref<boolean>(false); // Track whether the welcome message was shown
+const books = ref<Book[]>([]);
+const searchQuery = ref<string>('');
+const selectedCategory = ref<string>('All Categories');
+const selectedAuthor = ref<string>('All Authors');
+const categories = ref<string[]>([]);
+const authors = ref<string[]>([]);
+const currentPage = ref<number>(1);
+const totalPages = ref<number>(1);
+const isCategoryDropdownActive = ref<boolean>(false);
+const isAuthorDropdownActive = ref<boolean>(false);
+const isSearchButtonActive = ref<boolean>(false);
+const welcomeShown = ref<boolean>(false);
 
-// Function to show Toast Notification
 const showToast = (message: string, type: 'success' | 'error' = 'success'): void => {
   if (type === 'success') {
     toast.success(message);
@@ -43,12 +42,11 @@ const showToast = (message: string, type: 'success' | 'error' = 'success'): void
   }
 };
 
+
 // Fetch books from the backend with filters and pagination
 const fetchBooks = async (page = 1, query = '', category = '', author = ''): Promise<void> => {
   try {
-    const response = await fetch(
-      `http://localhost:3000/books?page=${page}&title=${query}&category=${category}&author=${author}`
-    );
+    const response = await fetch(`http://localhost:3000/books?page=${page}&title=${query}&category=${category}&author=${author}`);
     const data = await response.json();
     if (data && Array.isArray(data.books)) {
       books.value = data.books;
@@ -57,8 +55,7 @@ const fetchBooks = async (page = 1, query = '', category = '', author = ''): Pro
     }
   } catch (error) {
     console.error('Error fetching books:', error);
-    showToast("Failed to load books. Please try again later.", "error");
-    throw error;
+    showToast('Failed to load books. Please try again later.', 'error');
   }
 };
 
@@ -67,14 +64,11 @@ const fetchFilters = async (): Promise<void> => {
   try {
     const response = await fetch('http://localhost:3000/books/filters');
     const data: FilterResponse = await response.json();
-    if (data) {
-      categories.value = ['All Categories', ...data.categories];
-      authors.value = ['All Authors', ...data.authors];
-    }
+    categories.value = ['All Categories', ...data.categories];
+    authors.value = ['All Authors', ...data.authors];
   } catch (error) {
     console.error('Error fetching filters:', error);
-    showToast("Failed to load filters. Please try again later.", "error");
-    throw error;
+    showToast('Failed to load filters. Please try again later.', 'error');
   }
 };
 
@@ -91,7 +85,7 @@ const clearFilters = (): void => {
   selectedCategory.value = 'All Categories';
   selectedAuthor.value = 'All Authors';
   handleFilter(1);
-  showToast("Search again", "success");
+  showToast('Search again', 'success');
 };
 
 // Pagination logic
@@ -123,38 +117,31 @@ const toggleAuthorDropdown = (): void => {
 
 // Close dropdowns when clicking outside
 const handleClickOutside = (event: MouseEvent): void => {
-  if (!(event.target as HTMLElement).closest('.dropdown')) {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.dropdown-container')) {
     isCategoryDropdownActive.value = false;
     isAuthorDropdownActive.value = false;
   }
 };
 
 // Watch for changes to enable/disable the "Show Results" button
-watch([searchQuery, selectedCategory, selectedAuthor], (): void => {
-  const isSearchFilled = searchQuery.value.trim() !== '';
-  const isCategorySelected = selectedCategory.value !== 'All Categories';
-  const isAuthorSelected = selectedAuthor.value !== 'All Authors';
-  isSearchButtonActive.value = isSearchFilled || isCategorySelected || isAuthorSelected;
+watch([searchQuery, selectedCategory, selectedAuthor], () => {
+  isSearchButtonActive.value = searchQuery.value.trim() !== '' || selectedCategory.value !== 'All Categories' || selectedAuthor.value !== 'All Authors';
 });
 
 // Lifecycle hook: Runs when the component mounts
-onMounted(async (): Promise<void> => {
-  try {
-    // Fetch books and filters, show welcome message only if both succeed
-    await fetchBooks(1);
-    await fetchFilters();
-    if (!welcomeShown.value) {
-      showToast("Welcome to the Book Store!", "success");
-      welcomeShown.value = true;
-    }
-  } catch (error) {
-    // Handle error, no welcome toast if there's a failure
-    console.error('Error during setup:', error);
+onMounted(async () => {
+  await fetchBooks(1);
+  await fetchFilters();
+  if (!welcomeShown.value) {
+    showToast('Welcome to the Book Store!', 'success');
+    welcomeShown.value = true;
   }
+  document.addEventListener('click', handleClickOutside);
 });
 
 // Lifecycle hook: Runs before the component unmounts
-onBeforeUnmount((): void => {
+onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 </script>
@@ -166,45 +153,46 @@ onBeforeUnmount((): void => {
       <!-- Search Field -->
       <div class="w-3/12">
         <label class="block mb-2">Search by Title:</label>
-        <input v-model="searchQuery" placeholder="Enter book title" 
-          class="p-2 border rounded w-full text-sm md:text-base" />
+        <input v-model="searchQuery" placeholder="Enter book title" class="p-2 border rounded w-full text-sm md:text-base" />
       </div>
 
       <!-- Category Filter -->
-      <div class="w-3/12 relative">
+      <div class="w-3/12 relative dropdown-container">
         <label class="block mb-2">Filter by Category:</label>
-        <div @click="toggleCategoryDropdown" :class="{ 'dropdown-active': isCategoryDropdownActive }"
-             class="p-2 border rounded w-full text-sm md:text-base bg-white dropdown">
+        <div @click="toggleCategoryDropdown" class="p-2 border rounded w-full text-sm md:text-base bg-white cursor-pointer">
           {{ selectedCategory || 'All Categories' }}
         </div>
-        <ul v-if="isCategoryDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
-          <li v-for="category in categories" :key="category" @click="selectedCategory = category; toggleCategoryDropdown()"
-              class="p-2 cursor-pointer hover:bg-gray-400">{{ category }}</li>
+        <ul v-if="isCategoryDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2 z-50 shadow-lg">
+          <li v-for="category in categories" :key="category" @click="selectedCategory = category; toggleCategoryDropdown()" class="p-2 cursor-pointer hover:bg-gray-400">
+            {{ category }}
+          </li>
         </ul>
       </div>
 
       <!-- Author Filter -->
-      <div class="w-3/12 relative">
+      <div class="w-3/12 relative dropdown-container">
         <label class="block mb-2">Filter by Author:</label>
-        <div @click="toggleAuthorDropdown" :class="{ 'dropdown-active': isAuthorDropdownActive }"
-             class="p-2 border rounded w-full text-sm md:text-base bg-white dropdown">
+        <div @click="toggleAuthorDropdown" class="p-2 border rounded w-full text-sm md:text-base bg-white cursor-pointer">
           {{ selectedAuthor || 'All Authors' }}
         </div>
-        <ul v-if="isAuthorDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
-          <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleAuthorDropdown()"
-              class="p-2 cursor-pointer hover:bg-gray-400">{{ author }}</li>
+        <ul v-if="isAuthorDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2 z-50 shadow-lg">
+          <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleAuthorDropdown()" class="p-2 cursor-pointer hover:bg-gray-400">
+            {{ author }}
+          </li>
         </ul>
       </div>
 
+
       <!-- Filter Results Button -->
-      <div>
-<button @click="() => handleFilter()" :disabled="!isSearchButtonActive" 
-        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
-  Show Results
-</button>
+<div>
+  <button 
+    @click="() => handleFilter()"
+    :disabled="!isSearchButtonActive" 
+    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
+    Show Results
+  </button>
+</div>
 
-
-      </div>
 
       <!-- Clear Filters Button -->
       <div>
@@ -216,26 +204,15 @@ onBeforeUnmount((): void => {
 
     <!-- Main Content Section -->
     <main class="flex-1 bg-slate-300 h-90 p-4 md:p-6">
-
-      
-
-  
       <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-  <div 
-    v-for="book in books" 
-    :key="book._id" 
-    class="bg-white p-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-2xl"
-  >
-    <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
-    <p class="text-base sm:text-lg">Author: {{ book.author }}</p>
-    <p class="text-base sm:text-lg">Price: ${{ book.price }}</p>
-    <p class="text-base sm:text-lg">Category: {{ book.category }}</p>
-    <p class="text-sm text-gray-600 mt-2">{{ book.description }}</p>
-  </div>
-</div>
-
-
-
+        <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+          <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
+          <p class="text-base sm:text-lg">Author: {{ book.author }}</p>
+          <p class="text-base sm:text-lg">Price: ${{ book.price }}</p>
+          <p class="text-base sm:text-lg">Category: {{ book.category }}</p>
+          <p class="text-sm text-gray-600 mt-2">{{ book.description }}</p>
+        </div>
+      </div>
 
       <!-- Message for No Books Available -->
       <div v-else class="text-center">
@@ -243,19 +220,27 @@ onBeforeUnmount((): void => {
       </div>
     </main>
 
+
     <!-- Pagination Buttons -->
-     <div class="bg-gray-100" >
-      <div class="flex justify-center space-x-4 my-4 md:my-6">
-            <button @click="previousPage" :disabled="currentPage === 1" 
-               class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
-             Previous
-             </button>
-           <span class="text-base sm:text-lg">Page {{ currentPage }} of {{ totalPages }}</span>
-          <button @click="nextPage" :disabled="currentPage === totalPages" 
-               class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
-             Next
-           </button>
-     </div>
-    </div>
+<div class="bg-gray-100">
+  <div class="flex justify-center space-x-4 my-4 md:my-6">
+    <button
+      @click="() => previousPage()" 
+      :disabled="currentPage === 1"
+      class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg"
+    >
+      Previous
+    </button>
+    <span class="text-base sm:text-lg">Page {{ currentPage }} of {{ totalPages }}</span>
+    <button
+      @click="() => nextPage()"
+      :disabled="currentPage === totalPages"
+      class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg"
+    >
+      Next
+    </button>
+  </div>
+</div>
+
   </div>
 </template>
