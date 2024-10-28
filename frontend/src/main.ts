@@ -6,7 +6,7 @@ import Toast from 'vue-toastification'; // Import Vue Toastification
 import 'vue-toastification/dist/index.css'; // Import Vue Toastification CSS
 import App from './App.vue';
 import router from './router';
-import TT from './TT.vue';
+// import TT from './TT.vue';
 const app = createApp(App);
 
 app.use(createPinia());

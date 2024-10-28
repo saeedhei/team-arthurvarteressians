@@ -50,26 +50,51 @@ const getFiltersHandler: RequestHandler = async (req: Request, res: Response): P
   }
 };
 
+// POST /books - Add a new book
+const addBookHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { title, author, price, description, category } = req.body;
+
+    // Create a new Book document
+    const newBook = new Book({
+      title,
+      author,
+      price,
+      description,
+      category,
+    });
+
+    await newBook.save();
+
+    res.status(201).json({
+      message: 'Book added successfully',
+      book: newBook,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to add book', error });
+  }
+};
+
 // PUT /books/:id - Update book details
 const updateBookHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, author, price } = req.body;
+    const { title, author, price, description, category } = req.body;
 
     const updatedBook = await Book.findByIdAndUpdate(
       id,
-      { title, author, price },
+      { title, author, price, description, category },
       { new: true }
     );
 
     if (!updatedBook) {
-      res.status(404).json({ message: "Book not found" });
+      res.status(404).json({ message: 'Book not found' });
       return;
     }
 
-    res.json({ message: "Book updated successfully", book: updatedBook });
+    res.json({ message: 'Book updated successfully', book: updatedBook });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update book", error });
+    res.status(500).json({ message: 'Failed to update book', error });
   }
 };
 
@@ -81,19 +106,20 @@ const deleteBookHandler: RequestHandler = async (req: Request, res: Response): P
     const deletedBook = await Book.findByIdAndDelete(id);
 
     if (!deletedBook) {
-      res.status(404).json({ message: "Book not found" });
+      res.status(404).json({ message: 'Book not found' });
       return;
     }
 
-    res.json({ message: "Book deleted successfully" });
+    res.json({ message: 'Book deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete book", error });
+    res.status(500).json({ message: 'Failed to delete book', error });
   }
 };
 
 // Route definitions
 router.get('/', getBooksHandler);
 router.get('/filters', getFiltersHandler);
+router.post('/', addBookHandler); // New route for adding a book
 router.put('/:id', updateBookHandler);
 router.delete('/:id', deleteBookHandler);
 

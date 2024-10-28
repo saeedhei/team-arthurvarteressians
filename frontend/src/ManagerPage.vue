@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
@@ -22,13 +23,15 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const limit = 9;
 
-// Editable fields and popups
+// State for popups and book actions
 const editingBook = ref<Book | null>(null);
 const showEditPopup = ref(false);
-const showEditWarning = ref(false);
+const showAddPopup = ref(false);
 const showDeleteConfirmation = ref(false);
-const showFinalEditConfirmation = ref(false);
 const selectedBookToDelete = ref<Book | null>(null);
+
+// State for adding a new book
+const newBook = ref<Book>({ _id: '', title: '', author: '', price: 0, description: '', category: '' });
 
 const fetchBooks = async () => {
   try {
@@ -41,25 +44,35 @@ const fetchBooks = async () => {
   }
 };
 
-// Trigger edit warning, then confirmation popup for editing
-const editBook = (book: Book) => {
-  editingBook.value = { ...book };
-  showEditWarning.value = true;
+// Function to handle adding a new book
+const addBook = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/books', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newBook.value),
+    });
+    if (response.ok) {
+      toast.success('Book added successfully');
+      fetchBooks();
+      showAddPopup.value = false;
+      newBook.value = { _id: '', title: '', author: '', price: 0, description: '', category: '' };
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    toast.error('Failed to add book');
+  }
 };
 
-const proceedToEdit = () => {
-  showEditWarning.value = false;
+// Function to trigger edit popup
+const editBook = (book: Book) => {
+  editingBook.value = { ...book };
   showEditPopup.value = true;
 };
 
+// Function to save book changes
 const saveBookChanges = async () => {
-  if (!editingBook.value) return;
-
-  showEditPopup.value = false;
-  showFinalEditConfirmation.value = true;
-};
-
-const confirmEditSave = async () => {
   if (!editingBook.value) return;
 
   try {
@@ -69,15 +82,10 @@ const confirmEditSave = async () => {
       body: JSON.stringify(editingBook.value),
     });
     if (response.ok) {
-      toast.success('Book updated successfully!', {
-        icon: customCheckmarkIcon(),
-        timeout: 3000,
-        onClose: () => {
-          showFinalEditConfirmation.value = false;
-          editingBook.value = null;
-          fetchBooks(); // Refresh the book list after edit
-        },
-      });
+      toast.success('Book updated successfully!');
+      showEditPopup.value = false;
+      editingBook.value = null;
+      fetchBooks();
     } else {
       throw new Error();
     }
@@ -86,12 +94,13 @@ const confirmEditSave = async () => {
   }
 };
 
-// Confirmation for deletion
+// Function to confirm deletion
 const confirmDeleteBook = (book: Book) => {
   selectedBookToDelete.value = book;
   showDeleteConfirmation.value = true;
 };
 
+// Function to delete a book
 const deleteBook = async () => {
   if (!selectedBookToDelete.value) return;
 
@@ -100,10 +109,8 @@ const deleteBook = async () => {
       method: 'DELETE',
     });
     if (response.ok) {
-      toast.success('Book deleted successfully', {
-        icon: customCheckmarkIcon(),
-      });
-      fetchBooks(); // Refresh the book list after deletion
+      toast.success('Book deleted successfully');
+      fetchBooks();
       showDeleteConfirmation.value = false;
       selectedBookToDelete.value = null;
     } else {
@@ -129,55 +136,53 @@ const previousPage = () => {
   }
 };
 
-const customCheckmarkIcon = () => `
-  <svg class="toast-success-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-    <path d="M6 12l4 4L18 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="checkmark-path"/>
-  </svg>
-`;
-toast.success('Book updated successfully!', {
-  icon: customCheckmarkIcon(),
-  timeout: 3000,
-});
-
 onMounted(() => {
   fetchBooks();
 });
 </script>
 
-
-
 <template>
   <div> 
     <AppHeader />
     <section class="p-8 min-h-[80vh] bg-gray-100 flex flex-col justify-between items-center">
-
+      
+      <!-- Add Book Button -->
+      <div class="flex justify-end w-full mb-4">
+        <button @click="showAddPopup = true" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+          Add Book
+        </button>
+      </div>
+      
       <!-- Header Section -->
       <header class="text-center mb-6">
         <h1 class="text-3xl font-bold text-blue-600 mb-2">Manager Dashboard</h1>
         <p class="text-lg text-gray-700">Manage your books below</p>
       </header>
 
-      <!-- Book List with Modern SVG Icons for Edit and Delete -->
-      <div class="grid grid-cols-3  gap-8 w-full">
-        <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded-lg shadow-md relative flex justify-between items-center">
+      <!-- Book List with Edit and Delete Buttons -->
+      <div class="grid grid-cols-3 gap-8 w-full">
+        <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded-lg shadow-md relative flex flex-col">
           <div>
             <h2 class="font-semibold text-xl">{{ book.title }}</h2>
             <p class="text-gray-700">Author: {{ book.author }}</p>
             <p class="text-gray-700">Price: ${{ book.price }}</p>
+            <p class="text-gray-700">Category: {{ book.category }}</p>
+            <p class="text-gray-600">Description: {{ book.description }}</p>
           </div>
           
-          <!-- SVG Icons for Edit and Delete, aligned with justify-between -->
-          <div class="flex space-x-4">
+          <!-- Edit and Delete Buttons with SVG Icons -->
+          <div class="flex justify-end space-x-4 mt-4">
             <button @click="editBook(book)" class="text-blue-500 flex items-center space-x-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.5 3a1 1 0 0 1 .79.38l7.5 9a1 1 0 0 1 .02 1.24l-7.5 9A1 1 0 0 1 12 21V4a1 1 0 0 1 .5-.87Z"/>
+              <!-- Edit SVG Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.232 4.232a2.5 2.5 0 113.536 3.536l-1.768 1.768-3.536-3.536 1.768-1.768zM4 15.5v4h4l10.707-10.707a1 1 0 000-1.414l-3.586-3.586a1 1 0 00-1.414 0L4 15.5z"/>
               </svg>
               <span>Edit</span>
             </button>
             <button @click="confirmDeleteBook(book)" class="text-red-500 flex items-center space-x-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.78 2.79a.5.5 0 0 1 .72 0l3.49 3.5a.5.5 0 0 1 0 .7l-12 12a.5.5 0 0 1-.7 0l-3.5-3.5a.5.5 0 0 1 0-.7l12-12ZM4.3 19.3a1 1 0 0 0 0 1.42L8 24a1 1 0 0 0 1.42 0l9.88-9.88-4.12-4.12L4.3 19.3Z"/>
+              <!-- Delete SVG Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 7h-1l-1-1h-6l-1 1h-1v2h10v-2zM9 9h6l1 12h-8l1-12z"/>
               </svg>
               <span>Delete</span>
             </button>
@@ -196,14 +201,33 @@ onMounted(() => {
         </button>
       </div>
 
-      <!-- Warning for Edit Confirmation -->
-      <div v-if="showEditWarning" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+      <!-- Add Book Popup -->
+      <div v-if="showAddPopup" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
         <div class="bg-white p-6 rounded-md shadow-md max-w-md w-full">
-          <h3 class="text-lg mb-4 font-bold font-serif text-red-600 italic">Warning!</h3>
-          <p>Be careful, you are about to edit important information for <strong>{{ editingBook.title }}</strong>.</p>
+          <h3 class="text-lg font-semibold mb-4">Add New Book</h3>
+          <label class="block mb-2">
+            Title:
+            <input v-model="newBook.title" class="border p-2 w-full" />
+          </label>
+          <label class="block mb-2">
+            Author:
+            <input v-model="newBook.author" class="border p-2 w-full" />
+          </label>
+          <label class="block mb-2">
+            Price:
+            <input type="number" v-model="newBook.price" class="border p-2 w-full" />
+          </label>
+          <label class="block mb-2">
+            Description:
+            <input v-model="newBook.description" class="border p-2 w-full" />
+          </label>
+          <label class="block mb-2">
+            Category:
+            <input v-model="newBook.category" class="border p-2 w-full" />
+          </label>
           <div class="flex justify-end space-x-2 mt-4">
-            <button @click="showEditWarning = false" class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
-            <button @click="proceedToEdit" class="bg-yellow-500 text-white px-4 py-2 rounded">Proceed</button>
+            <button @click="showAddPopup = false" class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
+            <button @click="addBook" class="bg-green-500 text-white px-4 py-2 rounded">Add Book</button>
           </div>
         </div>
       </div>
@@ -224,21 +248,17 @@ onMounted(() => {
             Price:
             <input type="number" v-model="editingBook.price" class="border p-2 w-full" />
           </label>
+          <label class="block mb-2">
+            Description:
+            <input v-model="editingBook.description" class="border p-2 w-full" />
+          </label>
+          <label class="block mb-2">
+            Category:
+            <input v-model="editingBook.category" class="border p-2 w-full" />
+          </label>
           <div class="flex justify-end space-x-2 mt-4">
             <button @click="showEditPopup = false" class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
             <button @click="saveBookChanges" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Final Edit Confirmation Popup -->
-      <div v-if="showFinalEditConfirmation" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-md shadow-md max-w-md w-full">
-          <h3 class="text-lg font-semibold mb-4">Confirm Changes</h3>
-          <p>Are you sure you want to save changes to <strong>{{ editingBook.title }}</strong>?</p>
-          <div class="flex justify-end space-x-2 mt-4">
-            <button @click="showFinalEditConfirmation = false" class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
-            <button @click="confirmEditSave" class="bg-blue-500 text-white px-4 py-2 rounded">Yes, Save</button>
           </div>
         </div>
       </div>
@@ -247,7 +267,7 @@ onMounted(() => {
       <div v-if="showDeleteConfirmation" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
         <div class="bg-white p-6 rounded-md shadow-md max-w-md w-full">
           <h3 class="text-lg font-semibold mb-4">Confirm Deletion</h3>
-          <p>Are you sure you want to delete <strong>{{ selectedBookToDelete.title }}</strong>?</p>
+          <p>Are you sure you want to delete <strong>{{ selectedBookToDelete?.title }}</strong>?</p>
           <div class="flex justify-end space-x-2 mt-4">
             <button @click="showDeleteConfirmation = false" class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
             <button @click="deleteBook" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
