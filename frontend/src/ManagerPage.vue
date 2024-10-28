@@ -258,31 +258,3 @@ onMounted(() => {
     <AppFooter />
   </div>
 </template>
-
-<style>
-
-@keyframes checkmark {
-  0% {
-    stroke-dashoffset: 22px;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-.toast-success-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  margin-right: 8px;
-}
-
-.toast-success-icon .checkmark-path {
-  stroke-dasharray: 22px;
-  stroke-dashoffset: 22px;
-  animation: checkmark 0.6s ease forwards;
-}
-
-</style>

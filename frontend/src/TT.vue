@@ -1,45 +1,52 @@
+<!-- MainComponent.vue -->
 <template>
-     <div class="notification-container">
-       <label for="notification-type">Select Notification Type:</label>
-       <select v-model="selectedType" id="notification-type">
-         <option value="success">Success</option>
-         <option value="warning">Warning</option>
-         <option value="error">Error</option>
-       </select>
-   
-       <div class="notification-icon">
-         <SuccessIcon v-if="selectedType === 'success'" />
-         <WarningIcon v-if="selectedType === 'warning'" />
-         <ErrorIcon v-if="selectedType === 'error'" />
-       </div>
-     </div>
-   </template>
-   
-   <script setup lang="ts">
-   import { ref } from 'vue';
-   import SuccessIcon from './SuccessIcon.vue';
-   import WarningIcon from './WarningIcon.vue';
-   import ErrorIcon from './ErrorIcon.vue';
-   
-   const selectedType = ref('success'); // Default to success icon
-   </script>
-   
-   <style scoped>
-   .notification-container {
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     margin-top: 20px;
-   }
-   
-   #notification-type {
-     margin-bottom: 20px;
-     padding: 8px;
-     font-size: 1rem;
-   }
-   
-   .notification-icon {
-     margin-top: 20px;
-   }
-   </style>
-   
+  <div>
+    <button @click="showSuccess">Show Success Popup</button>
+    <button @click="showWarning">Show Warning Popup</button>
+    <button @click="showError">Show Error Popup</button>
+
+    <!-- Notification Popup -->
+    <NotificationPopup
+      :type="notificationType"
+      :title="notificationTitle"
+      :message="notificationMessage"
+      :show="showPopup"
+      @close="closePopup"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import NotificationPopup from './NotificationPopup.vue';
+
+const showPopup = ref(false);
+const notificationType = ref('');
+const notificationTitle = ref('');
+const notificationMessage = ref('');
+
+const showSuccess = () => {
+  notificationType.value = 'success';
+  notificationTitle.value = 'Good job!';
+  notificationMessage.value = 'You clicked the button!';
+  showPopup.value = true;
+};
+
+const showWarning = () => {
+  notificationType.value = 'warning';
+  notificationTitle.value = 'Warning!';
+  notificationMessage.value = 'This is a warning message.';
+  showPopup.value = true;
+};
+
+const showError = () => {
+  notificationType.value = 'error';
+  notificationTitle.value = 'Error!';
+  notificationMessage.value = 'Something went wrong.';
+  showPopup.value = true;
+};
+
+const closePopup = () => {
+  showPopup.value = false;
+};
+</script>
