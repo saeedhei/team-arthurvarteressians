@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,12 +17,12 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 /* GET users listing. */
 router.get('/', (req, res, next) => {
-    const fetchData = async (url) => {
+    const fetchData = (url) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const response = await fetch(url);
+            const response = yield fetch(url);
             // Use optional chaining to check if response exists and is okay
-            if (response?.ok) {
-                const data = await response.json();
+            if (response === null || response === void 0 ? void 0 : response.ok) {
+                const data = yield response.json();
                 return data;
             }
             else {
@@ -24,7 +33,7 @@ router.get('/', (req, res, next) => {
             console.error('Failed to fetch data:', error.message);
             throw error; // Re-throw the error after logging
         }
-    };
+    });
     fetchData('https://jsonplaceholder.typicode.com/posts')
         .then(data => {
         const responseData = JSON.stringify(data, null, 2); // 2 for pretty print

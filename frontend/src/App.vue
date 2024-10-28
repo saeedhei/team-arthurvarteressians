@@ -1,17 +1,15 @@
 <!-- src/AppMainPage.vue -->
 <template>
-  <div class="w-screen h-screen flex flex-col">
+  <div v-if="$route.path === '/'">
     <AppHeader class="h-[10vh]" />
-    <div class="flex-1 overflow-hidden">
-      <router-view v-slot="{ Component }">
-        <component :is="Component" />
-      </router-view>
-    </div>
-    <AppFooter class="h-[10vh]" />
+    <AppBodySection class="h-[80vh]" />
+    <AppFooter  />
   </div>
+  <router-view v-else></router-view>
 </template>
 
 <script setup lang="ts">
 import AppHeader from './AppHeader.vue';
 import AppFooter from './AppFooter.vue';
+import AppBodySection from './AppBodySection.vue';
 </script>

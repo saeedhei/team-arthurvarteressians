@@ -160,9 +160,9 @@ onBeforeUnmount((): void => {
 </script>
 
 <template>
-  <div class="w-screen flex flex-col min-h-full">
+  <div class="w-screen h-[80vh] flex flex-col">
     <!-- Search and Filter Section -->
-    <div class="bg-slate-100 p-8 md:flex-row flex items-center justify-around max-w-full">
+    <div class="bg-slate-100 p-4 md:flex-row flex items-center justify-around max-w-full">
       <!-- Search Field -->
       <div class="w-3/12">
         <label class="block mb-2">Search by Title:</label>
@@ -177,7 +177,7 @@ onBeforeUnmount((): void => {
              class="p-2 border rounded w-full text-sm md:text-base bg-white dropdown">
           {{ selectedCategory || 'All Categories' }}
         </div>
-        <ul v-if="isCategoryDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
+        <ul v-if="isCategoryDropdownActive" class="absolute bg-gray-300 w-full p-2 rounded-lg overflow-y-auto mt-2">
           <li v-for="category in categories" :key="category" @click="selectedCategory = category; toggleCategoryDropdown()"
               class="p-2 cursor-pointer hover:bg-gray-400">{{ category }}</li>
         </ul>
@@ -190,7 +190,7 @@ onBeforeUnmount((): void => {
              class="p-2 border rounded w-full text-sm md:text-base bg-white dropdown">
           {{ selectedAuthor || 'All Authors' }}
         </div>
-        <ul v-if="isAuthorDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2">
+        <ul v-if="isAuthorDropdownActive" class="absolute bg-gray-300 w-full p-2 rounded-lg overflow-y-auto mt-2">
           <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleAuthorDropdown()"
               class="p-2 cursor-pointer hover:bg-gray-400">{{ author }}</li>
         </ul>
@@ -215,16 +215,22 @@ onBeforeUnmount((): void => {
     </div>
 
     <!-- Main Content Section -->
-    <main class="flex-1 bg-slate-300 h-90 p-4 md:p-6">
-      <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded shadow-lg">
-          <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
-          <p class="text-base sm:text-lg">Author: {{ book.author }}</p>
-          <p class="text-base sm:text-lg">Price: ${{ book.price }}</p>
-          <p class="text-base sm:text-lg">Category: {{ book.category }}</p>
-          <p class="text-sm text-gray-600 mt-2">{{ book.description }}</p>
-        </div>
-      </div>
+    <main class="flex-1 bg-slate-300 p-4  md:p-6">
+     <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div
+    v-for="book in books"
+    :key="book._id"
+    class="bg-white p-4 h-60 rounded-lg shadow-md border border-gray-200 overflow-hidden flex flex-col justify-center transform transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+  >
+    <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2 truncate">{{ book.title }}</h3>
+    <p class="text-base sm:text-lg truncate">Author: {{ book.author }}</p>
+    <p class="text-base sm:text-lg truncate">Price: ${{ book.price }}</p>
+    <p class="text-base sm:text-lg truncate">Category: {{ book.category }}</p>
+    <p class="text-sm text-gray-600 mt-2 truncate">{{ book.description }}</p>
+  </div>
+</div>
+
+
 
       <!-- Message for No Books Available -->
       <div v-else class="text-center">
