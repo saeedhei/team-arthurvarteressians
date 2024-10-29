@@ -1,11 +1,11 @@
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
+<!-- ManagerPage.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 import AppHeader from './AppHeader.vue';
 import AppFooter from './AppFooter.vue';
-import LoadingOverlay from './LoadingOverlay.vue'; // Import the overlay component
-import SuccessIcon from './SuccessIcon.vue'; // Import success icon
+import LoadingOverlay from './LoadingOverlay.vue'; // Import LoadingOverlay component
 
 const toast = useToast();
 
@@ -26,7 +26,7 @@ const totalPages = ref(1);
 const limit = 9;
 
 // Sorting states
-const isDescending = ref(true); // Set default sort to descending
+const isDescending = ref(true); // Default sort to descending
 
 // State for popups and book actions
 const editingBook = ref<Book | null>(null);
@@ -38,6 +38,10 @@ const selectedBookToDelete = ref<Book | null>(null);
 
 // State for adding a new book
 const newBook = ref<Book>({ _id: '', title: '', author: '', price: 0, description: '', category: '' });
+
+// Overlay message and icon type
+const overlayMessage = ref('');
+const overlayIconType = ref<'success' | 'warning' | 'error'>('success');
 
 // Fetch books with sorting based on isDescending
 const fetchBooks = async () => {
@@ -67,9 +71,10 @@ const addBook = async () => {
       body: JSON.stringify(newBook.value),
     });
     if (response.ok) {
-      toast.success('Book added successfully');
+      overlayMessage.value = 'Book added successfully!';
+      overlayIconType.value = 'success';
       showLoadingOverlay.value = true; // Show overlay on success
-      fetchBooks(); // Refresh the book list to include the new addition
+      fetchBooks(); // Refresh book list
       showAddPopup.value = false;
       newBook.value = { _id: '', title: '', author: '', price: 0, description: '', category: '' };
       setTimeout(() => showLoadingOverlay.value = false, 2000); // Hide overlay after 2 seconds
@@ -98,10 +103,13 @@ const saveBookChanges = async () => {
       body: JSON.stringify(editingBook.value),
     });
     if (response.ok) {
-      toast.success('Book updated successfully!');
+      overlayMessage.value = 'Book updated successfully!';
+      overlayIconType.value = 'success';
+      showLoadingOverlay.value = true; // Show overlay on success
+      fetchBooks();
       showEditPopup.value = false;
       editingBook.value = null;
-      fetchBooks();
+      setTimeout(() => showLoadingOverlay.value = false, 2000); // Hide overlay after 2 seconds
     } else {
       throw new Error();
     }
@@ -125,10 +133,13 @@ const deleteBook = async () => {
       method: 'DELETE',
     });
     if (response.ok) {
-      toast.success('Book deleted successfully');
+      overlayMessage.value = 'Book deleted successfully!';
+      overlayIconType.value = 'error';
+      showLoadingOverlay.value = true; // Show overlay on delete
       fetchBooks();
       showDeleteConfirmation.value = false;
       selectedBookToDelete.value = null;
+      setTimeout(() => showLoadingOverlay.value = false, 2000); // Hide overlay after 2 seconds
     } else {
       throw new Error();
     }
@@ -249,10 +260,8 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Loading Overlay with Success Icon -->
-      <LoadingOverlay v-if="showLoadingOverlay" :show="showLoadingOverlay" message="Book added successfully!">
-        <SuccessIcon />
-      </LoadingOverlay>
+      <!-- Loading Overlay with Dynamic Icon and Message -->
+      <LoadingOverlay :show="showLoadingOverlay" :message="overlayMessage" :iconType="overlayIconType" />
 
       <!-- Edit Book Popup -->
       <div v-if="showEditPopup" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
@@ -300,9 +309,3 @@ onMounted(() => {
     <AppFooter />
   </div>
 </template>
-
-<style scoped>
-button {
-  cursor: pointer;
-}
-</style>

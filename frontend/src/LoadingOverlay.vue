@@ -1,51 +1,41 @@
+<!-- LoadingOverlay.vue -->
 <template>
-     <div v-if="show" class="overlay">
-       <p class="overlay-text">{{ message }}</p>
-     </div>
-   </template>
-   
-   <script setup lang="ts">
-   import { defineProps, defineEmits, watch } from 'vue';
-   
-   // Define props for custom message and visibility control
-   const props = defineProps<{
-     show: boolean;
-     message: string;
-   }>();
-   
-   // Define emit function
-   const emit = defineEmits(['hideOverlay']);
-   
-   // Automatically hide after a few seconds (optional)
-   watch(() => props.show, (newVal) => {
-     if (newVal) {
-       setTimeout(() => {
-         emit('hideOverlay'); // Emit hideOverlay event after timeout
-       }, 5000); // Adjust time as needed
-     }
-   });
-   </script>
-   
-   <style scoped>
-   .overlay {
-     position: fixed;
-     top: 0;
-     left: 0;
-     width: 100%;
-     height: 100vh;
-     background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-     color: white;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     font-size: 1.5rem;
-     z-index: 1000;
-   }
-   
-   .overlay-text {
-     text-align: center;
-     font-size: 2rem;
-     font-weight: bold;
-   }
-   </style>
-   
+  <div v-if="show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+      <!-- Conditionally render icons based on the iconType prop -->
+      <component :is="currentIcon" class="mb-4" v-if="currentIcon" />
+      <p class="text-gray-700 text-lg">{{ message }}</p>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, defineProps } from 'vue';
+import SuccessIcon from './SuccessIcon.vue';
+import WarningIcon from './WarningIcon.vue';
+import ErrorIcon from './ErrorIcon.vue';
+
+const props = defineProps<{
+  show: boolean;
+  message: string;
+  iconType: 'success' | 'warning' | 'error';
+}>();
+
+// Compute the icon component based on iconType
+const currentIcon = computed(() => {
+  switch (props.iconType) {
+    case 'success':
+      return SuccessIcon;
+    case 'warning':
+      return WarningIcon;
+    case 'error':
+      return ErrorIcon;
+    default:
+      return null;
+  }
+});
+</script>
+
+<style scoped>
+/* Add any additional styling if necessary */
+</style>
