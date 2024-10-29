@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useToast } from 'vue-toastification';
-
+import SkeletonLoader from './SkeletonLoader.vue';
 // Define types for the book and filters data
 interface Book {
   _id: string;
@@ -33,6 +33,7 @@ const isCategoryDropdownActive = ref<boolean>(false);
 const isAuthorDropdownActive = ref<boolean>(false);
 const isSearchButtonActive = ref<boolean>(false);
 const welcomeShown = ref<boolean>(false);
+const isLoading = ref<boolean>(true); // Track loading state
 
 const showToast = (message: string, type: 'success' | 'error' = 'success'): void => {
   if (type === 'success') {
@@ -43,9 +44,9 @@ const showToast = (message: string, type: 'success' | 'error' = 'success'): void
 };
 
 
-// Fetch books from the backend with filters and pagination
 const fetchBooks = async (page = 1, query = '', category = '', author = ''): Promise<void> => {
   try {
+    isLoading.value = true; // Set loading state to true
     const response = await fetch(`http://localhost:3000/books?page=${page}&title=${query}&category=${category}&author=${author}`);
     const data = await response.json();
     if (data && Array.isArray(data.books)) {
@@ -56,6 +57,8 @@ const fetchBooks = async (page = 1, query = '', category = '', author = ''): Pro
   } catch (error) {
     console.error('Error fetching books:', error);
     showToast('Failed to load books. Please try again later.', 'error');
+  } finally {
+    isLoading.value = false; // Set loading state to false after fetch completes
   }
 };
 
@@ -204,6 +207,10 @@ onBeforeUnmount(() => {
 
     <!-- Main Content Section -->
     <main class="flex-1 bg-slate-300 h-90 p-4 md:p-6">
+      <div v-if="isLoading">
+        <!-- Display SkeletonLoader when data is loading -->
+        <SkeletonLoader />
+      </div>
       <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
           <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
@@ -215,9 +222,9 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Message for No Books Available -->
-      <div v-else class="text-center">
+      <!-- <div v-else class="text-center">
         <p class="text-lg sm:text-xl">No books available.</p>
-      </div>
+      </div> -->
     </main>
 
 

@@ -6,6 +6,7 @@ import { useToast } from 'vue-toastification';
 import AppHeader from './AppHeader.vue';
 import AppFooter from './AppFooter.vue';
 import LoadingOverlay from './LoadingOverlay.vue'; // Import LoadingOverlay component
+import SkeletonLoader from './SkeletonLoader.vue';
 
 const toast = useToast();
 
@@ -26,6 +27,8 @@ const totalPages = ref(1);
 const limit = 9;
 
 // Sorting states
+const isLoading = ref(true); // New loading state for skeleton
+
 const isDescending = ref(true); // Default sort to descending
 
 // State for popups and book actions
@@ -46,6 +49,7 @@ const overlayIconType = ref<'success' | 'warning' | 'error'>('success');
 // Fetch books with sorting based on isDescending
 const fetchBooks = async () => {
   try {
+    isLoading.value = true; // Show skeleton while fetching data
     const sort = isDescending.value ? 'desc' : 'asc';
     const response = await fetch(`http://localhost:3000/books?page=${currentPage.value}&limit=${limit}&sort=${sort}`);
     const data = await response.json();
@@ -53,6 +57,8 @@ const fetchBooks = async () => {
     totalPages.value = data.totalPages;
   } catch (error) {
     toast.error('Failed to fetch books.');
+  } finally {
+    isLoading.value = false; // Hide skeleton once data is fetched
   }
 };
 
@@ -188,6 +194,12 @@ onMounted(() => {
         <h1 class="text-3xl font-bold text-blue-600 mb-2">Manager Dashboard</h1>
         <p class="text-lg text-gray-700">Manage your books below</p>
       </header>
+
+
+      <div v-if="isLoading">
+        <SkeletonLoader />
+      </div>
+
 
       <!-- Book List with Edit and Delete Buttons -->
       <div class="grid grid-cols-3 gap-8 w-full">
