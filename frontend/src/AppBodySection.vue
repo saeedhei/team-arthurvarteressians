@@ -220,11 +220,6 @@ onBeforeUnmount(() => {
           <p class="text-sm text-gray-600 mt-2">{{ book.description }}</p>
         </div>
       </div>
-
-      <!-- Message for No Books Available -->
-      <!-- <div v-else class="text-center">
-        <p class="text-lg sm:text-xl">No books available.</p>
-      </div> -->
     </main>
 
 

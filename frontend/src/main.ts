@@ -3,11 +3,10 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import Toast from 'vue-toastification' // Import Toastification
 import 'vue-toastification/dist/index.css' // Import Toastification CSS
-//import App from './App.vue'
 import router from './router'
-import ManagerPage from './ManagerPage.vue'
+import App from './App.vue'
 
-const app = createApp(ManagerPage)
+const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(Toast) // Added for Toast
