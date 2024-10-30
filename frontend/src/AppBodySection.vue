@@ -156,17 +156,21 @@ onBeforeUnmount(() => {
       <!-- Search Field -->
       <div class="w-3/12">
         <label class="block mb-2">Search by Title:</label>
-        <input v-model="searchQuery" placeholder="Enter book title" class="p-2 border rounded w-full text-sm md:text-base" />
+        <input v-model="searchQuery" placeholder="Enter book title"
+          class="p-2 border rounded w-full text-sm md:text-base" />
       </div>
 
       <!-- Category Filter -->
       <div class="w-3/12 relative dropdown-container">
         <label class="block mb-2">Filter by Category:</label>
-        <div @click="toggleCategoryDropdown" class="p-2 border rounded w-full text-sm md:text-base bg-white cursor-pointer">
+        <div @click="toggleCategoryDropdown"
+          class="p-2 border rounded w-full text-sm md:text-base bg-white cursor-pointer">
           {{ selectedCategory || 'All Categories' }}
         </div>
-        <ul v-if="isCategoryDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2 z-50 shadow-lg">
-          <li v-for="category in categories" :key="category" @click="selectedCategory = category; toggleCategoryDropdown()" class="p-2 cursor-pointer hover:bg-gray-400">
+        <ul v-if="isCategoryDropdownActive"
+          class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2 z-50 shadow-lg">
+          <li v-for="category in categories" :key="category"
+            @click="selectedCategory = category; toggleCategoryDropdown()" class="p-2 cursor-pointer hover:bg-gray-400">
             {{ category }}
           </li>
         </ul>
@@ -175,11 +179,14 @@ onBeforeUnmount(() => {
       <!-- Author Filter -->
       <div class="w-3/12 relative dropdown-container">
         <label class="block mb-2">Filter by Author:</label>
-        <div @click="toggleAuthorDropdown" class="p-2 border rounded w-full text-sm md:text-base bg-white cursor-pointer">
+        <div @click="toggleAuthorDropdown"
+          class="p-2 border rounded w-full text-sm md:text-base bg-white cursor-pointer">
           {{ selectedAuthor || 'All Authors' }}
         </div>
-        <ul v-if="isAuthorDropdownActive" class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2 z-50 shadow-lg">
-          <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleAuthorDropdown()" class="p-2 cursor-pointer hover:bg-gray-400">
+        <ul v-if="isAuthorDropdownActive"
+          class="absolute bg-gray-300 w-full max-h-[30vh] p-2 rounded-lg overflow-y-auto mt-2 z-50 shadow-lg">
+          <li v-for="author in authors" :key="author" @click="selectedAuthor = author; toggleAuthorDropdown()"
+            class="p-2 cursor-pointer hover:bg-gray-400">
             {{ author }}
           </li>
         </ul>
@@ -187,14 +194,12 @@ onBeforeUnmount(() => {
 
 
       <!-- Filter Results Button -->
-<div>
-  <button 
-    @click="() => handleFilter()"
-    :disabled="!isSearchButtonActive" 
-    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
-    Show Results
-  </button>
-</div>
+      <div>
+        <button @click="() => handleFilter()" :disabled="!isSearchButtonActive"
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
+          Show Results
+        </button>
+      </div>
 
 
       <!-- Clear Filters Button -->
@@ -212,7 +217,8 @@ onBeforeUnmount(() => {
         <SkeletonLoader />
       </div>
       <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div v-for="book in books" :key="book._id" class="bg-white p-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+        <div v-for="book in books" :key="book._id"
+          class="bg-white p-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
           <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
           <p class="text-base sm:text-lg">Author: {{ book.author }}</p>
           <p class="text-base sm:text-lg">Price: ${{ book.price }}</p>
@@ -224,25 +230,18 @@ onBeforeUnmount(() => {
 
 
     <!-- Pagination Buttons -->
-<div class="bg-gray-100">
-  <div class="flex justify-center space-x-4 my-4 md:my-6">
-    <button
-      @click="() => previousPage()" 
-      :disabled="currentPage === 1"
-      class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg"
-    >
-      Previous
-    </button>
-    <span class="text-base sm:text-lg">Page {{ currentPage }} of {{ totalPages }}</span>
-    <button
-      @click="() => nextPage()"
-      :disabled="currentPage === totalPages"
-      class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg"
-    >
-      Next
-    </button>
-  </div>
-</div>
-
+    <div class="bg-gray-100">
+      <div class="flex justify-center space-x-4 my-4 md:my-6">
+        <button @click="() => previousPage()" :disabled="currentPage === 1"
+          class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
+          Previous
+        </button>
+        <span class="text-base sm:text-lg">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button @click="() => nextPage()" :disabled="currentPage === totalPages"
+          class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
+          Next
+        </button>
+      </div>
+    </div>
   </div>
 </template>
