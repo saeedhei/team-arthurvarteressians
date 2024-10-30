@@ -28,7 +28,6 @@ const limit = 9;
 
 // Sorting states
 const isLoading = ref(true); // New loading state for skeleton
-
 const isDescending = ref(true); // Default sort to descending
 
 // State for popups and book actions
@@ -177,8 +176,10 @@ onMounted(() => {
 <template>
   <div> 
     <AppHeader />
-    <section class="p-8 min-h-[80vh] bg-gray-100 flex flex-col justify-between items-center">
-      
+    <section class="p-8 min-h-[80vh] w-screen bg-gray-100 flex flex-col justify-between items-center">
+      <div v-if="isLoading">
+        <SkeletonLoader />
+      </div>
       <!-- Add Book and Sort Buttons -->
       <div class="flex justify-between w-full mb-4">
         <button @click="showAddPopup = true" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
@@ -196,9 +197,7 @@ onMounted(() => {
       </header>
 
 
-      <div v-if="isLoading">
-        <SkeletonLoader />
-      </div>
+     
 
 
       <!-- Book List with Edit and Delete Buttons -->
