@@ -1,7 +1,7 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router';
-import AppBodySection from '@/AppBodySection.vue';
-import ManagerPage from '@/ManagerPage.vue';
+import AppBodySection from '@/components/AppBodySection.vue';
+import ManagerPage from '@/components/ManagerPage.vue';
 
 const routes = [
   {

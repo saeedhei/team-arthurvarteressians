@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useToast } from 'vue-toastification';
-import SkeletonLoader from './SkeletonLoader.vue';
-// Define types for the book and filters data
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
+
 interface Book {
   _id: string;
   title: string;
@@ -42,7 +42,6 @@ const showToast = (message: string, type: 'success' | 'error' = 'success'): void
     toast.error(message);
   }
 };
-
 
 const fetchBooks = async (page = 1, query = '', category = '', author = ''): Promise<void> => {
   try {
@@ -192,7 +191,6 @@ onBeforeUnmount(() => {
         </ul>
       </div>
 
-
       <!-- Filter Results Button -->
       <div>
         <button @click="() => handleFilter()" :disabled="!isSearchButtonActive"
@@ -200,7 +198,6 @@ onBeforeUnmount(() => {
           Show Results
         </button>
       </div>
-
 
       <!-- Clear Filters Button -->
       <div>
@@ -227,7 +224,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </main>
-
 
     <!-- Pagination Buttons -->
     <div class="bg-gray-100">

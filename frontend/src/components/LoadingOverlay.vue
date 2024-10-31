@@ -1,4 +1,3 @@
-<!-- LoadingOverlay.vue -->
 <template>
   <div v-if="show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
@@ -11,9 +10,9 @@
 
 <script setup lang="ts">
 import { computed, defineProps } from 'vue';
-import SuccessIcon from './SuccessIcon.vue';
-import WarningIcon from './WarningIcon.vue';
-import ErrorIcon from './ErrorIcon.vue';
+import SuccessIcon from '@/components/SuccessIcon.vue';
+import WarningIcon from '@/components/WarningIcon.vue';
+import ErrorIcon from '@/components/ErrorIcon.vue';
 
 const props = defineProps<{
   show: boolean;
@@ -37,5 +36,4 @@ const currentIcon = computed(() => {
 </script>
 
 <style scoped>
-/* Add any additional styling if necessary */
 </style>

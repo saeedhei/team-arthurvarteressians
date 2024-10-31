@@ -1,4 +1,3 @@
-<!-- src/AppMainPage.vue -->
 <template>
   <div v-if="$route.path === '/'">
     <AppHeader class="h-[10vh]" />
@@ -9,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import AppHeader from './AppHeader.vue';
-import AppFooter from './AppFooter.vue';
-import AppBodySection from './AppBodySection.vue';
+import AppHeader from './components/AppHeader.vue';
+import AppFooter from './components/AppFooter.vue';
+import AppBodySection from './components/AppBodySection.vue';
 </script>

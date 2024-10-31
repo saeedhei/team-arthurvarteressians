@@ -1,7 +1,6 @@
-// models/Book.ts
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
-// Define the IBook interface extending Document for TypeScript typing
+// Define the Book interface
 export interface IBook extends Document {
   title: string;
   author: string;

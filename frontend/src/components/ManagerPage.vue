@@ -2,10 +2,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
-import AppHeader from './AppHeader.vue'
-import AppFooter from './AppFooter.vue'
-import LoadingOverlay from './LoadingOverlay.vue'
-import SkeletonLoader from './SkeletonLoader.vue'
+import AppHeader from '@/components/AppHeader.vue'
+import AppFooter from '@/components/AppFooter.vue'
+import LoadingOverlay from '@/components/LoadingOverlay.vue'
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 const toast = useToast()
 
@@ -39,12 +39,12 @@ const selectedBookToDelete = ref<Book | null>(null)
 
 // State for adding a new book
 const newBook = ref<Book>({
-  _id: '',
   title: '',
   author: '',
   price: 0,
   description: '',
   category: '',
+  _id: ''
 })
 
 // Overlay message and icon type
@@ -78,17 +78,22 @@ const toggleSorting = () => {
 // Function to handle adding a new book
 const addBook = async () => {
   try {
+    const { _id, ...bookData } = newBook.value;
+
     const response = await fetch('http://localhost:3000/books', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newBook.value),
-    })
+      body: JSON.stringify(bookData),
+    });
+
     if (response.ok) {
-      overlayMessage.value = 'Book added successfully!'
-      overlayIconType.value = 'success'
-      showLoadingOverlay.value = true // Show overlay on success
-      fetchBooks() // Refresh book list
-      showAddPopup.value = false
+      overlayMessage.value = 'Book added successfully!';
+      overlayIconType.value = 'success';
+      showLoadingOverlay.value = true; 
+      fetchBooks(); // Refresh book list
+      showAddPopup.value = false;
+      
+      // Reset newBook fields for the next entry
       newBook.value = {
         _id: '',
         title: '',
@@ -96,15 +101,17 @@ const addBook = async () => {
         price: 0,
         description: '',
         category: '',
-      }
-      setTimeout(() => (showLoadingOverlay.value = false), 2000) // Hide overlay after 2 seconds
+      };
+
+      setTimeout(() => (showLoadingOverlay.value = false), 2000); 
     } else {
-      throw new Error()
+      throw new Error();
     }
   } catch (error) {
-    toast.error('Failed to add book')
+    toast.error('Failed to add book');
   }
-}
+};
+
 
 // Function to trigger edit popup
 const editBook = (book: Book) => {
@@ -128,11 +135,11 @@ const saveBookChanges = async () => {
     if (response.ok) {
       overlayMessage.value = 'Book updated successfully!'
       overlayIconType.value = 'success'
-      showLoadingOverlay.value = true // Show overlay on success
+      showLoadingOverlay.value = true
       fetchBooks()
       showEditPopup.value = false
       editingBook.value = null
-      setTimeout(() => (showLoadingOverlay.value = false), 2000) // Hide overlay after 2 seconds
+      setTimeout(() => (showLoadingOverlay.value = false), 2000) 
     } else {
       throw new Error()
     }
@@ -161,11 +168,11 @@ const deleteBook = async () => {
     if (response.ok) {
       overlayMessage.value = 'Book deleted successfully!'
       overlayIconType.value = 'error'
-      showLoadingOverlay.value = true // Show overlay on delete
+      showLoadingOverlay.value = true
       fetchBooks()
       showDeleteConfirmation.value = false
       selectedBookToDelete.value = null
-      setTimeout(() => (showLoadingOverlay.value = false), 2000) // Hide overlay after 2 seconds
+      setTimeout(() => (showLoadingOverlay.value = false), 2000)
     } else {
       throw new Error()
     }
@@ -350,7 +357,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Loading Overlay with Dynamic Icon and Message -->
+      <!-- Loading Overlay -->
       <LoadingOverlay
         :show="showLoadingOverlay"
         :message="overlayMessage"
