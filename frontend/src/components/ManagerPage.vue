@@ -2,8 +2,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
-import AppHeader from '@/components/AppHeader.vue'
-import AppFooter from '@/components/AppFooter.vue'
 import LoadingOverlay from '@/components/LoadingOverlay.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
@@ -301,7 +299,6 @@ onMounted(() => {
       </div>
     </div>
       
-
       <!-- Add Book Popup -->
       <div
         v-if="showAddPopup"
