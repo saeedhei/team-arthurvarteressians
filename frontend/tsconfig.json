@@ -1,9 +1,13 @@
 {
   "compilerOptions": {
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["vite/client"]  // Add this line 
   },
   "include": ["src/**/*.vue", "src/**/*.ts"]
 }
