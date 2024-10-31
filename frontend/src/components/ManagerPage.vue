@@ -85,7 +85,6 @@ const addBook = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bookData),
     });
-
     if (response.ok) {
       overlayMessage.value = 'Book added successfully!';
       overlayIconType.value = 'success';
@@ -111,7 +110,6 @@ const addBook = async () => {
     toast.error('Failed to add book');
   }
 };
-
 
 // Function to trigger edit popup
 const editBook = (book: Book) => {
@@ -203,10 +201,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <AppHeader />
-    <section
-      class="p-8 min-h-[80vh] w-screen bg-gray-100 flex flex-col items-center"
-    >
+    <section class="p-4 sm:p-8 w-full sm:w-screen bg-gray-100 flex flex-col items-center">
       <!-- Header and Buttons -->
       <header class="text-center mb-6 w-full">
         <h1 class="text-3xl font-bold text-blue-600 mb-2">Manager Dashboard</h1>
@@ -214,7 +209,7 @@ onMounted(() => {
       </header>
 
       <!-- Add Book and Sort Buttons -->
-      <div class="flex justify-between w-full mb-4">
+      <div class="flex flex-col sm:flex-row justify-between w-full mb-4 space-y-4 sm:space-y-0">
         <button
           @click="showAddPopup = true"
           class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
@@ -229,12 +224,13 @@ onMounted(() => {
         </button>
       </div>
 
-      <!-- Books Section: SkeletonLoader or Book List -->
+      <!-- SkeletonLoader -->
       <div v-if="isLoading" class="w-full">
         <SkeletonLoader />
       </div>
 
-      <div v-else class="grid grid-cols-3 gap-8 w-full">
+      <!-- Book List -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
         <div
           v-for="book in books"
           :key="book._id"
@@ -248,7 +244,7 @@ onMounted(() => {
             <p class="text-gray-600">Description: {{ book.description }}</p>
           </div>
 
-          <!-- Edit and Delete Buttons with SVG Icons -->
+          <!-- Edit and Delete Buttons -->
           <div class="flex justify-end space-x-4 mt-4">
             <button
               @click="editBook(book)"
@@ -291,23 +287,20 @@ onMounted(() => {
       </div>
 
       <!-- Pagination Controls -->
-      <div class="flex justify-center mt-6 space-x-4">
-        <button
-          @click="previousPage"
-          :disabled="currentPage === 1"
-          class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-        >
+      <div class="bg-gray-100 p-4">
+      <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-y-2 md:space-y-0 my-4 md:my-6">
+        <button @click="() => previousPage()" :disabled="currentPage === 1"
+          class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-sm md:text-base">
           Previous
         </button>
-        <span>Page {{ currentPage }} of {{ totalPages }}</span>
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-        >
+        <span class="text-center text-sm md:text-base">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button @click="() => nextPage()" :disabled="currentPage === totalPages"
+          class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-sm md:text-base">
           Next
         </button>
       </div>
+    </div>
+      
 
       <!-- Add Book Popup -->
       <div
@@ -389,10 +382,7 @@ onMounted(() => {
           </label>
           <label class="block mb-2">
             Description:
-            <input
-              v-model="editingBook.description"
-              class="border p-2 w-full"
-            />
+            <input v-model="editingBook.description" class="border p-2 w-full" />
           </label>
           <label class="block mb-2">
             Category:
@@ -424,8 +414,7 @@ onMounted(() => {
           <h3 class="text-lg font-semibold mb-4">Confirm Deletion</h3>
           <p>
             Are you sure you want to delete
-            <strong>{{ selectedBookToDelete?.title }}</strong
-            >?
+            <strong>{{ selectedBookToDelete?.title }}</strong>?
           </p>
           <div class="flex justify-end space-x-2 mt-4">
             <button
@@ -444,6 +433,5 @@ onMounted(() => {
         </div>
       </div>
     </section>
-    <AppFooter />
   </div>
 </template>

@@ -149,19 +149,20 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="w-screen flex flex-col min-h-full">
+  <div class="w-full bg-slate-100 flex flex-col min-h-full">
     <!-- Search and Filter Section -->
-    <div class="bg-slate-100 p-8 md:flex-row flex items-center justify-around max-w-full">
+    <div class="bg-slate-100 p-4 sm:p-6 md:p-8 flex flex-col md:flex-row items-center justify-around space-y-4 md:space-y-0 md:space-x-4 max-w-full">
+      
       <!-- Search Field -->
-      <div class="w-3/12">
-        <label class="block mb-2">Search by Title:</label>
+      <div class="w-full md:w-3/12">
+        <label class="block mb-2 text-sm md:text-base">Search by Title:</label>
         <input v-model="searchQuery" placeholder="Enter book title"
           class="p-2 border rounded w-full text-sm md:text-base" />
       </div>
 
       <!-- Category Filter -->
-      <div class="w-3/12 relative dropdown-container">
-        <label class="block mb-2">Filter by Category:</label>
+      <div class="w-full md:w-3/12 relative dropdown-container">
+        <label class="block mb-2 text-sm md:text-base">Filter by Category:</label>
         <div @click="toggleCategoryDropdown"
           class="p-2 border rounded w-full text-sm md:text-base bg-white cursor-pointer">
           {{ selectedCategory || 'All Categories' }}
@@ -176,8 +177,8 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Author Filter -->
-      <div class="w-3/12 relative dropdown-container">
-        <label class="block mb-2">Filter by Author:</label>
+      <div class="w-full md:w-3/12 relative dropdown-container">
+        <label class="block mb-2 text-sm md:text-base">Filter by Author:</label>
         <div @click="toggleAuthorDropdown"
           class="p-2 border rounded w-full text-sm md:text-base bg-white cursor-pointer">
           {{ selectedAuthor || 'All Authors' }}
@@ -192,28 +193,27 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Filter Results Button -->
-      <div>
+      <div class="w-full md:w-auto flex justify-center md:justify-start">
         <button @click="() => handleFilter()" :disabled="!isSearchButtonActive"
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full md:w-auto text-sm md:text-base disabled:bg-gray-400 disabled:cursor-not-allowed">
           Show Results
         </button>
       </div>
 
       <!-- Clear Filters Button -->
-      <div>
-        <button @click="clearFilters" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+      <div class="w-full md:w-auto flex justify-center md:justify-start">
+        <button @click="clearFilters" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 w-full md:w-auto text-sm md:text-base">
           Clear Filters
         </button>
       </div>
     </div>
 
     <!-- Main Content Section -->
-    <main class="flex-1 bg-slate-300 h-90 p-4 md:p-6">
+    <main class="flex-1 bg-slate-300 p-4 md:p-6">
       <div v-if="isLoading">
-        <!-- Display SkeletonLoader when data is loading -->
         <SkeletonLoader />
       </div>
-      <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div v-if="books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="book in books" :key="book._id"
           class="bg-white p-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
           <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{{ book.title }}</h3>
@@ -226,18 +226,19 @@ onBeforeUnmount(() => {
     </main>
 
     <!-- Pagination Buttons -->
-    <div class="bg-gray-100">
-      <div class="flex justify-center space-x-4 my-4 md:my-6">
+    <div class="bg-gray-100 p-4">
+      <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-y-2 md:space-y-0 my-4 md:my-6">
         <button @click="() => previousPage()" :disabled="currentPage === 1"
-          class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
+          class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-sm md:text-base">
           Previous
         </button>
-        <span class="text-base sm:text-lg">Page {{ currentPage }} of {{ totalPages }}</span>
+        <span class="text-center text-sm md:text-base">Page {{ currentPage }} of {{ totalPages }}</span>
         <button @click="() => nextPage()" :disabled="currentPage === totalPages"
-          class="px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-base sm:text-lg">
+          class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full md:w-auto text-sm md:text-base">
           Next
         </button>
       </div>
     </div>
   </div>
 </template>
+
