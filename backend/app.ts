@@ -1,43 +1,45 @@
-import createError from 'http-errors';
+// app.ts
 import express, { Request, Response, NextFunction } from 'express';
-import path from 'path';
-// npm install --save-dev @types/cookie-parser
-import cookieParser from 'cookie-parser';
-// npm install --save-dev @types/morgan
-import logger from 'morgan';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import booksRouter from './routes/booksRouter';
+import { connectToDatabase } from './database';
 
-import indexRouter from './routes/index';
-import usersRouter from './routes/users';
+dotenv.config();
 
-const app: express.Application = express();
+const app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
-
-app.use(logger('dev'));
+// Middleware setup
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Database connection
+connectToDatabase();
 
-// catch 404 and forward to error handler
+// Routes
+app.use('/books', booksRouter);
+
+// 404 Error Handler for Undefined Routes
 app.use((req: Request, res: Response, next: NextFunction) => {
-  next(createError(404));
+  const error = new Error(`Not Found - ${req.originalUrl}`);
+  res.status(404);
+  next(error); // Passes the error to the global error handler
 });
 
-// error handler
+// Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  console.error('Error:', err); // Logs the error stack trace in the console
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // Set the status code based on the error or default to 500
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode);
+
+  // Provide detailed error message in development; otherwise, generic error
+  res.json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }), // Stack trace only in development mode
+  });
 });
 
 export default app;

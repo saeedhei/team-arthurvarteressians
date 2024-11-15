@@ -6,26 +6,32 @@
     "node": "^20.18.0"
   },
   "scripts": {
+    "start": "node server.js",
     "check-node": "ts-node check-node-version.ts",
-    "dev": "npm run check-node && nodemon",
     "build": "tsc",
     "postbuild": "copyfiles -u 1 \"views/**/*\" dist/views",
     "serve": "node dist/bin/www.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
     "debug": "~2.6.9",
-    "express": "~4.16.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
     "http-errors": "~1.6.3",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.3",
     "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11"
+    "pug": "^3.0.3"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
     "@types/debug": "^4.1.12",
     "@types/express": "^5.0.0",
+    "@types/mongoose": "^5.11.96",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^22.7.5",
+    "@types/node": "^22.8.4",
     "@types/semver": "^7.5.8",
     "copyfiles": "^2.4.1",
     "semver": "^7.6.3",
